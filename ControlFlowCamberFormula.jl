@@ -47,3 +47,7 @@ end
 println("\n")
 println(zbar)
 
+pop!(x) #removes the last value of the x array to allow DataFrames to work
+using DataFrames #only works in Julia REPL?
+DataFrame()
+DataFrame("X" => x, "zbar" => zbar)
