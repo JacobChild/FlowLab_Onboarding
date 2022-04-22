@@ -53,12 +53,12 @@ step = parse(Float64, step)
 x = x_input(L, step)
 t = thickness_calculations(x)
 
-#println(t) #If Running in VS Code Uncomment this as I couldn't get DataFrame to work
+println(t) #If Running in VS Code Uncomment this as I couldn't get DataFrame to work
 
-using DataFrames #Only seems to work in Julia Terminal, not VS Code Terminal? ***research
+#using DataFrames #Only seems to work in Julia Terminal, not VS Code Terminal? ***research
 
-DataFrame()
+#DataFrame()
 
-DataFrame("X" => x, "Thickness" => t)
+#DataFrame("X" => x, "Thickness" => t)
 
 
