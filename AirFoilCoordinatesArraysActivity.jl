@@ -33,7 +33,8 @@ function user_input()
     p = parse(Int64, input1[2])
     p = p/10    #converts the chord position to the proper units
     t = parse(Int64, input1[3:4])
-    #println("\n t:", t)
+    t = t/100
+    println("\n t:", t)
 
     return c, p, t
 end
@@ -43,9 +44,9 @@ thickness_calculations(x,p)
 Takes in the x coordinates, and max thickness (p), calculates thickness, and ouputs the array
 
 """
-function thickness_calculations(x,p)
-    m = p
-    TArray = 10*m.*(.2969*sqrt.(x) - .1260*x - .3537*x.^2 + .2843*x.^3 - .1015*x.^4)
+function thickness_calculations(x,t)
+    m = t
+    TArray = 10*m*(.2969*sqrt(x) - .1260*x - .3537*x^2 + .2843*x^3 - .1015*x^4)
     return TArray
 end
 
@@ -83,8 +84,9 @@ end
 #Actual code- See how it goes 
 
 c, p, t = user_input()  #function to get user input
-x = range(0,1,step=.1)  #creates an x range
-TArray = thickness_calculations(x, p)   #calculates the thicknesses
+#x = range(0,1,step=.1)  #creates an x range
+x = [0:0.10:1;]
+TArray = thickness_calculations.(x, t)   #calculates the thicknesses
 zbar = zbar_calculations(c, p, x) #calculate and returns zbar
 zu, zl = zupper_lower(zbar, TArray) #calculates and returns zupper and z lower
 
@@ -96,4 +98,8 @@ using DataFrames #only seems to work in the Julia REPL
 
 DataFrame()
 
-DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl)
+DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl, "Thickness" => TArray, "Zbar" => zbar)
+
+using Plots
+plot(x,zu)
+plot!(x,zl)
