@@ -33,7 +33,7 @@ function user_input()
     p = parse(Int64, input1[2])
     p = p/10    #converts the chord position to the proper units
     t = parse(Int64, input1[3:4])
-    println("\n t:", t)
+    #println("\n t:", t)
 
     return c, p, t
 end
@@ -63,27 +63,37 @@ function zbar_calculations(c,p,x)
             global zbar = "you wenti"
         end
     end
-
-    return zbar 
-
-end
-
-#quick test function to understand iterating
-function test_iterator(x)
-    for i in x
-        if i <= .3
-            println(i+7)
-        elseif i > .3
-            println(i)
-        end
-
-    end
     
+    return zbar
 end
 
-#quick test for zbar function
-x = range(0,1, step=.1)
-c =.2
-p = .04
-zbar = zbar_calculations(c, p, x)
-println(zbar)
+"""
+zupper_lower(zbar, TArray)
+calculates zu and zl and returns both
+"""
+function zupper_lower(zbar, TArray)
+
+    zu = zbar .+ TArray/2
+    zl = zbar .- TArray/2
+    
+    return zu, zl
+end
+
+
+#Actual code- See how it goes 
+
+c, p, t = user_input()  #function to get user input
+x = range(0,1,step=.1)  #creates an x range
+TArray = thickness_calculations(x, p)   #calculates the thicknesses
+zbar = zbar_calculations(c, p, x) #calculate and returns zbar
+zu, zl = zupper_lower(zbar, TArray) #calculates and returns zupper and z lower
+
+#outputs
+
+#println("\n \n", zu, "\n \n", zl) #for vs code
+
+using DataFrames #only seems to work in the Julia REPL
+
+DataFrame()
+
+DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl)
