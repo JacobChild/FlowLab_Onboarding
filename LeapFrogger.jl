@@ -27,27 +27,23 @@ using LinearAlgebra
 #Inputs/Variables
 d = 1 #distance between vortex ring top and bottom points, and between rings
 G = 1   #strength of vorticity = Gamma, same for all rings/points
-dt = .01
+x = collect(0:0.10:1)
 
 #Point 1
 Pt1Gamma = [0; 0; -G]
 Pt1Location = [0; -d/2; 0]
-Pt1TotVeloc = [0; 0; 0]
 
 #Point 2
 Pt2Gamma = [0; 0; G]
 Pt2Location = [0; d/2; 0]
-Pt2TotVeloc = [0; 0; 0]
 
 #Point 3
 Pt3Gamma = [0; 0; G]
 Pt3Location = [d; d/2; 0]
-Pt3TotVeloc = [0; 0; 0]
 
 #Point 4
 Pt4Gamma = [0; 0; -G]
 Pt4Location = [d; -d/2; 0]
-Pt4TotVeloc = [0; 0; 0]
 
 
 #before putting everything in functions, practice for pt 1
@@ -81,30 +77,41 @@ function update_location(Location, VInfTot, dt)
     return NewLocation
 end
 
-#Point 1
-V21Inf = v_influence(Pt1Location, Pt2Location, Pt2Gamma)
-V31Inf = v_influence(Pt1Location, Pt3Location, Pt3Gamma)
-V41Inf = v_influence(Pt1Location, Pt4Location, Pt4Gamma)
-V1InfTot = total_influence(V21Inf, V31Inf, V41Inf)
-#println(V21Inf)
+###Looping Function
 
-#Point 2
-V12Inf = v_influence(Pt2Location, Pt1Location, Pt1Gamma)
-V32Inf = v_influence(Pt2Location, Pt3Location, Pt3Gamma)
-V42Inf = v_influence(Pt2Location, Pt4Location, Pt4Gamma)
-V2InfTot = total_influence(V12Inf, V32Inf, V42Inf)
+for i in x 
 
-#Point 3
-V13Inf = v_influence(Pt3Location, Pt1Location, Pt1Gamma)
-V23Inf = v_influence(Pt3Location, Pt2Location, Pt2Gamma)
-V43Inf = v_influence(Pt3Location, Pt4Location, Pt4Gamma)
-V3InfTot = total_influence(V13Inf, V23Inf, V43Inf)
+    #Point 1
+    V21Inf = v_influence(Pt1Location, Pt2Location, Pt2Gamma)
+    V31Inf = v_influence(Pt1Location, Pt3Location, Pt3Gamma)
+    V41Inf = v_influence(Pt1Location, Pt4Location, Pt4Gamma)
+    V1InfTot = total_influence(V21Inf, V31Inf, V41Inf)
+    #println(V21Inf)
 
-#Point 4
-V14Inf = v_influence(Pt4Location, Pt1Location, Pt1Gamma)
-V24Inf = v_influence(Pt4Location, Pt2Location, Pt2Gamma)
-V34Inf = v_influence(Pt4Location, Pt3Location, Pt3Gamma)
-V4InfTot = total_influence(V14Inf, V24Inf, V34Inf)
+    #Point 2
+    V12Inf = v_influence(Pt2Location, Pt1Location, Pt1Gamma)
+    V32Inf = v_influence(Pt2Location, Pt3Location, Pt3Gamma)
+    V42Inf = v_influence(Pt2Location, Pt4Location, Pt4Gamma)
+    V2InfTot = total_influence(V12Inf, V32Inf, V42Inf)
 
-# Pt1Location = update_location(Pt1Location, V1InfTot, dt) #Make sure to update the positions last!
-# println(Pt1Location)
+    #Point 3
+    V13Inf = v_influence(Pt3Location, Pt1Location, Pt1Gamma)
+    V23Inf = v_influence(Pt3Location, Pt2Location, Pt2Gamma)
+    V43Inf = v_influence(Pt3Location, Pt4Location, Pt4Gamma)
+    V3InfTot = total_influence(V13Inf, V23Inf, V43Inf)
+
+    #Point 4
+    V14Inf = v_influence(Pt4Location, Pt1Location, Pt1Gamma)
+    V24Inf = v_influence(Pt4Location, Pt2Location, Pt2Gamma)
+    V34Inf = v_influence(Pt4Location, Pt3Location, Pt3Gamma)
+    V4InfTot = total_influence(V14Inf, V24Inf, V34Inf)
+
+    #Update Location of All points
+    global Pt1Location = update_location(Pt1Location, V1InfTot, i) #Make sure to update the positions last!
+    global Pt2Location = update_location(Pt2Location, V2InfTot, i)
+    global Pt3Location = update_location(Pt3Location, V3InfTot, i)
+    global Pt4Location = update_location(Pt4Location, V4InfTot, i)
+
+end
+
+println(Pt1Location, Pt2Location, Pt3Location, Pt4Location)
