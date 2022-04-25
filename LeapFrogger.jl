@@ -29,7 +29,7 @@ using Plots
 #Inputs/Variables
 d = 1 #distance between vortex ring top and bottom points, and between rings
 G = 1   #strength of vorticity = Gamma, same for all rings/points
-x = collect(0:0.10:1)
+x = collect(0:0.01:2) #gives a time vector from 0-xseconds with .01 second step size
 plot()  #to clear the plot
 
 #Point 1
@@ -136,11 +136,11 @@ for i in x
 end
 #plots
 #Vortex Ring 1 (back)
-display(plot!([x1],[y1], m = 3, label = false, color = :blue)) #plot only does vectors, not floats etc, number values are plot commands
-display(plot!([x2],[y2], m = 3, label = false, color = :blue))
+display(plot!([x1],[y1],  label = false, color = :blue)) #plot only does vectors, not floats etc, number values are plot commands
+display(plot!([x2],[y2],  label = false, color = :blue))
 
 #Vortex Ring 2 (front)
-display(plot!([x3],[y3], m = 3, label = false, color = :green))
-display(plot!([x4],[y4], m = 3, label = false, color = :green))
+display(plot!([x3],[y3],  label = false, color = :green))
+display(plot!([x4],[y4],  label = false, color = :green))
 
 #println(Pt1Location, Pt2Location, Pt3Location, Pt4Location)
