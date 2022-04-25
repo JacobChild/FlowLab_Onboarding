@@ -23,6 +23,8 @@ Righthand rule = out of page = positive, into page = negative.
 
 #needed packages
 using LinearAlgebra
+using Plots
+#using DataFrame
 
 #Inputs/Variables
 d = 1 #distance between vortex ring top and bottom points, and between rings
@@ -111,6 +113,9 @@ for i in x
     global Pt2Location = update_location(Pt2Location, V2InfTot, i)
     global Pt3Location = update_location(Pt3Location, V3InfTot, i)
     global Pt4Location = update_location(Pt4Location, V4InfTot, i)
+
+    #Plot
+    plot(x, Pt1Location)
 
 end
 
