@@ -30,6 +30,7 @@ using Plots
 d = 1 #distance between vortex ring top and bottom points, and between rings
 G = 1   #strength of vorticity = Gamma, same for all rings/points
 x = collect(0:0.10:1)
+plot()  #to clear the plot
 
 #Point 1
 Pt1Gamma = [0; 0; -G]
@@ -113,10 +114,11 @@ for i in x
     global Pt2Location = update_location(Pt2Location, V2InfTot, i)
     global Pt3Location = update_location(Pt3Location, V3InfTot, i)
     global Pt4Location = update_location(Pt4Location, V4InfTot, i)
-
+    x1 = Pt1Location[1]
+    y1 = Pt1Location[2]
     #Plot
-    plot(x, Pt1Location)
-
+    display(plot!([x1],[y1], m = 3, label = false)) #plot only does vectors, not floats etc, number values are plot commands
+    
 end
-
+#display(plot1)
 println(Pt1Location, Pt2Location, Pt3Location, Pt4Location)
