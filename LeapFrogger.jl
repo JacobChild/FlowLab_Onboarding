@@ -35,18 +35,26 @@ plot()  #to clear the plot
 #Point 1
 Pt1Gamma = [0; 0; -G]
 Pt1Location = [0; -d/2; 0]
+x1 = []
+y1 = []
 
 #Point 2
 Pt2Gamma = [0; 0; G]
 Pt2Location = [0; d/2; 0]
+x2 = []
+y2 = []
 
 #Point 3
 Pt3Gamma = [0; 0; G]
 Pt3Location = [d; d/2; 0]
+x3 = []
+y3 = []
 
 #Point 4
 Pt4Gamma = [0; 0; -G]
 Pt4Location = [d; -d/2; 0]
+x4 = []
+y4 = []
 
 
 #before putting everything in functions, practice for pt 1
@@ -114,11 +122,25 @@ for i in x
     global Pt2Location = update_location(Pt2Location, V2InfTot, i)
     global Pt3Location = update_location(Pt3Location, V3InfTot, i)
     global Pt4Location = update_location(Pt4Location, V4InfTot, i)
-    x1 = Pt1Location[1]
-    y1 = Pt1Location[2]
-    #Plot
-    display(plot!([x1],[y1], m = 3, label = false)) #plot only does vectors, not floats etc, number values are plot commands
+    global x1 = push!(x1,Pt1Location[1]) #creates a series of x and y values for each point 
+    global y1 = push!(y1,Pt1Location[2]) 
+    global x2 = push!(x2,Pt2Location[1]) 
+    global y2 = push!(y2,Pt2Location[2])
+    global x3 = push!(x3,Pt3Location[1]) 
+    global y3 = push!(y3,Pt3Location[2]) 
+    global x4 = push!(x4,Pt4Location[1]) 
+    global y4 = push!(y4,Pt4Location[2])
     
+
+
 end
-#display(plot1)
-println(Pt1Location, Pt2Location, Pt3Location, Pt4Location)
+#plots
+#Vortex Ring 1 (back)
+display(plot!([x1],[y1], m = 3, label = false, color = :blue)) #plot only does vectors, not floats etc, number values are plot commands
+display(plot!([x2],[y2], m = 3, label = false, color = :blue))
+
+#Vortex Ring 2 (front)
+display(plot!([x3],[y3], m = 3, label = false, color = :green))
+display(plot!([x4],[y4], m = 3, label = false, color = :green))
+
+#println(Pt1Location, Pt2Location, Pt3Location, Pt4Location)
