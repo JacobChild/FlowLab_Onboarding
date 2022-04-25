@@ -85,7 +85,7 @@ end
 
 c, p, t = user_input()  #function to get user input
 #x = range(0,1,step=.1)  #creates an x range
-x = [0:0.10:1;]
+x = collect(0:0.10:1)
 TArray = thickness_calculations.(x, t)   #calculates the thicknesses
 zbar = zbar_calculations(c, p, x) #calculate and returns zbar
 zu, zl = zupper_lower(zbar, TArray) #calculates and returns zupper and z lower
@@ -98,8 +98,11 @@ using DataFrames #only seems to work in the Julia REPL
 
 DataFrame()
 
-DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl, "Thickness" => TArray, "Zbar" => zbar)
+Data = DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl, "Thickness" => TArray, "Zbar" => zbar)
 
-using Plots
-plot(x,zu)
-plot!(x,zl)
+display(Data)
+
+#look into aspect ratio for plots 
+ using Plots
+ plot(x,zu)
+ plot!(x,zl)
