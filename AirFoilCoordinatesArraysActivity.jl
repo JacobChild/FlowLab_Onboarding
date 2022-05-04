@@ -106,3 +106,5 @@ display(Data)
  using Plots
  plot(x,zu)
  plot!(x,zl)
+ 
+ #has error somewhere
