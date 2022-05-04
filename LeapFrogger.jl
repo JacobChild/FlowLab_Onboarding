@@ -28,10 +28,12 @@ using Plots
 
 #Inputs/Variables
 d = 1 #distance between vortex ring top and bottom points, and between rings
-G = 1   #strength of vorticity = Gamma, same for all rings/points
-x = collect(0:0.01:2) #gives a time vector from 0-xseconds with .01 second step size
+G = 2   #strength of vorticity = Gamma, same for all rings/points
+dt = .01 #time step size
+x = collect(0:dt:20) #gives a time vector from 0-xseconds with .01 second step size
 plot()  #to clear the plot
 
+#p1 = zeros(lenght(x), 3)
 #Point 1
 Pt1Gamma = [0; 0; -G]
 Pt1Location = [0; -d/2; 0]
@@ -72,7 +74,7 @@ y4 = []
 function v_influence(Location1, Location2, Gamma)
     R = Location1 - Location2 #how to make sure this is right positive vs negative?
     MagnitudeR = sqrt(R[1]^2 + R[2]^2 + R[3]^2) #the magnitude of the distance btwn the 2 pts
-    VInf = cross(Gamma, R) / (2*pi*MagnitudeR) #The influence pt2 has on 1 for velocity
+    VInf = cross(Gamma, R) / (2*pi*MagnitudeR^2) #The influence pt2 has on 1 for velocity
     return VInf
 end
 
@@ -90,7 +92,7 @@ end
 
 ###Looping Function
 
-for i in x 
+for i in x #i=1:length(x)
 
     #Point 1
     V21Inf = v_influence(Pt1Location, Pt2Location, Pt2Gamma)
@@ -118,10 +120,11 @@ for i in x
     V4InfTot = total_influence(V14Inf, V24Inf, V34Inf)
 
     #Update Location of All points
-    global Pt1Location = update_location(Pt1Location, V1InfTot, i) #Make sure to update the positions last!
-    global Pt2Location = update_location(Pt2Location, V2InfTot, i)
-    global Pt3Location = update_location(Pt3Location, V3InfTot, i)
-    global Pt4Location = update_location(Pt4Location, V4InfTot, i)
+    global Pt1Location = update_location(Pt1Location, V1InfTot, dt) #Make sure to update the positions last!
+    # p1[i,:] = update_location(Pt1Location, V1InfTot, dt)
+    global Pt2Location = update_location(Pt2Location, V2InfTot, dt)
+    global Pt3Location = update_location(Pt3Location, V3InfTot, dt)
+    global Pt4Location = update_location(Pt4Location, V4InfTot, dt)
     global x1 = push!(x1,Pt1Location[1]) #creates a series of x and y values for each point 
     global y1 = push!(y1,Pt1Location[2]) 
     global x2 = push!(x2,Pt2Location[1]) 
@@ -130,17 +133,26 @@ for i in x
     global y3 = push!(y3,Pt3Location[2]) 
     global x4 = push!(x4,Pt4Location[1]) 
     global y4 = push!(y4,Pt4Location[2])
-    
+    #x1,y1,_ = update_location(Pt1Location, V1InfTot, dt)
+    # #debugging
+    # A = V12Inf[1]   #x direction velocity influence of pt 3 on pt 2
+    # #B = V12Inf[2]   #y direction velocity influence of pt 3 on pt2
+    # display(plot!([A], legend = false, m = 3))
 
 
 end
 #plots
 #Vortex Ring 1 (back)
-display(plot!([x1],[y1],  label = false, color = :blue)) #plot only does vectors, not floats etc, number values are plot commands
-display(plot!([x2],[y2],  label = false, color = :blue))
+display(plot!(x1,y1,  label = false, color = :blue)) #plot only does vectors, not floats etc, number values are plot commands
+display(plot!(x2,y2,  label = false, color = :blue))
 
 #Vortex Ring 2 (front)
-display(plot!([x3],[y3],  label = false, color = :green))
-display(plot!([x4],[y4],  label = false, color = :green))
+display(plot!(x3,y3,  label = false, color = :green))
+display(plot!(x4,y4,  label = false, color = :green))
+
+# plt = plot(xaxis="X distance (m)", yaxis="Y distance (m)")
+# plot!(x1, y1)
+# display(plt)
+
 
 #println(Pt1Location, Pt2Location, Pt3Location, Pt4Location)

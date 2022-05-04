@@ -57,11 +57,11 @@ Takes in c, p, and x values and outputs zbar
 function zbar_calculations(c,p,x)
     for i in x
         if i <= p
-            global zbar = c.*(2*p*x .- x.^2)/(p^2)
+             zbar = c.*(2*p*x .- x.^2)/(p^2)
         elseif i > p
-            global zbar = c.*(1 - 2*p .+ 2*p*x .- x.^2)/((1-p)^2)
+             zbar = c.*(1 - 2*p .+ 2*p*x .- x.^2)/((1-p)^2)
         else 
-            global zbar = "you wenti"
+             zbar = "you wenti"
         end
     end
     
@@ -87,8 +87,8 @@ c, p, t = user_input()  #function to get user input
 #x = range(0,1,step=.1)  #creates an x range
 x = collect(0:0.10:1)
 TArray = thickness_calculations.(x, t)   #calculates the thicknesses
-zbar = zbar_calculations(c, p, x) #calculate and returns zbar
-zu, zl = zupper_lower(zbar, TArray) #calculates and returns zupper and z lower
+zbarn = zbar_calculations(c, p, x) #calculate and returns zbar
+zu, zl = zupper_lower(zbarn, TArray) #calculates and returns zupper and z lower
 
 #outputs
 
