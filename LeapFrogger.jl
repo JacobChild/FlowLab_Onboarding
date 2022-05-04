@@ -30,7 +30,7 @@ using Plots
 d = 1 #distance between vortex ring top and bottom points, and between rings
 G = 2   #strength of vorticity = Gamma, same for all rings/points
 dt = .01 #time step size
-x = collect(0:dt:20) #gives a time vector from 0-xseconds with .01 second step size
+x = collect(0:dt:10) #gives a time vector from 0-xseconds with .01 second step size
 plot()  #to clear the plot
 
 #p1 = zeros(lenght(x), 3)
@@ -143,8 +143,8 @@ for i in x #i=1:length(x)
 end
 #plots
 #Vortex Ring 1 (back)
-display(plot!(x1,y1,  label = false, color = :blue)) #plot only does vectors, not floats etc, number values are plot commands
-display(plot!(x2,y2,  label = false, color = :blue))
+display(plot!(x1,y1,  label = false, color = :blue, xlabel="Position (m)", ylabel = "Position (m)")) #plot only does vectors, not floats etc, number values are plot commands
+display(plot!(x2,y2,  label = false, color = :blue, title = "Leap Frogging Vortex Ring Positions Over Time"))
 
 #Vortex Ring 2 (front)
 display(plot!(x3,y3,  label = false, color = :green))
