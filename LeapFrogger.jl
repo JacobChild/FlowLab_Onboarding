@@ -28,9 +28,9 @@ using Plots
 
 #Inputs/Variables
 d = 1 #distance between vortex ring top and bottom points, and between rings
-G = 2   #strength of vorticity = Gamma, same for all rings/points
+G = 1   #strength of vorticity = Gamma, same for all rings/points
 dt = .01 #time step size
-x = collect(0:dt:10) #gives a time vector from 0-xseconds with .01 second step size
+x = collect(0:dt:480) #gives a time vector from 0-xseconds with .01 second step size
 plot()  #to clear the plot
 
 #p1 = zeros(lenght(x), 3)
