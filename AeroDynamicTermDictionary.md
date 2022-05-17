@@ -2,7 +2,9 @@
 
 ## Airfoil/Airplane Terms
 
-![Aerodynamic Terms Figure](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F1.bp.blogspot.com%2F-NY3Sz-JhfgM%2FW3VCQ7soa5I%2FAAAAAAAAANI%2F3iPiQWLd6kUN_3IjcpR2eA_TZxCzD2IcQCLcBGAs%2Fs1600%2Fangle%252Bof%252Bcontact%252B2.png&f=1&nofb=1)*Figure 1: Diagram of Basic Aerodynamics Terms and their locations on an airfoil.*
+<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F1.bp.blogspot.com%2F-NY3Sz-JhfgM%2FW3VCQ7soa5I%2FAAAAAAAAANI%2F3iPiQWLd6kUN_3IjcpR2eA_TZxCzD2IcQCLcBGAs%2Fs1600%2Fangle%252Bof%252Bcontact%252B2.png&f=1&nofb=1" width="400" height="300" />
+
+*Figure 1: Diagram of Basic Aerodynamics Terms and their locations on an airfoil.*
 
 **Angle of Attack-** Angle between the freestream direction and the chord line, usually relative to horizontal.
 
@@ -58,7 +60,9 @@ $$ C_l= m (\alpha - \alpha_0) $$
 $$ C_p = \frac{P}{\rho n^3 D^5} $$
 *Explanation-* P = Power, rho = density of the fluid, n = propeller rotation rate in revolutions per second, D = propeller diameter
 
-![Coefficient of Power vs Tip Speed ratio](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.researchgate.net%2Fprofile%2FPere_Andrada%2Fpublication%2F316537994%2Ffigure%2Ffig6%2FAS%3A488277909217285%401493425933404%2FPower-coefficient-versus-tip-ratio-for-different-types-of-wind-turbines.png&f=1&nofb=1)*Figure 2: Interesting diagram showing the Power Coefficient vs the tip speed ratio for various windmill types. Note the theoretical Coefficient of Power limit (the Betz limit) at .593*
+<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.researchgate.net%2Fprofile%2FPere_Andrada%2Fpublication%2F316537994%2Ffigure%2Ffig6%2FAS%3A488277909217285%401493425933404%2FPower-coefficient-versus-tip-ratio-for-different-types-of-wind-turbines.png&f=1&nofb=1" width="200" height="200" />
+
+*Figure 2: Interesting diagram showing the Power Coefficient vs the tip speed ratio for various windmill types. Note the theoretical Coefficient of Power limit (the Betz limit) at .593*
 
 **Coefficient of Torque (*CQ*)-**  Ratio of required torque to theoretical propeller required torque.
 $$ C_Q = \frac {Q}{\rho n^2 D^5} $$
@@ -91,7 +95,10 @@ $$ M = \frac{V}{a} $$
 
 **Verification-** "Are we building the product right?" - Barry Boehm comes before validation and is to verify that the process in the code is correct and that there are no bugs, it is not actually running/executing the code, but instead is like "walking through" it and and checking the process
 
-![VerificationVsValidation](https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.researchgate.net%2Fprofile%2FEdward-Rodriguez-8%2Fpublication%2F236441120%2Ffigure%2Ffig1%2FAS%3A452331234959360%401484855578952%2FSimplified-view-of-the-model-verification-and-validation-process-8_Q640.jpg&f=1&nofb=1)*Figure 3: Diagram of Validation vs Verification (In research) and their relation to the model and real world/experimental data.*
+<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fwww.researchgate.net%2Fprofile%2FEdward-Rodriguez-8%2Fpublication%2F236441120%2Ffigure%2Ffig1%2FAS%3A452331234959360%401484855578952%2FSimplified-view-of-the-model-verification-and-validation-process-8_Q640.jpg " width="300" height="300" />
+
+*Figure 3: Diagram of Validation vs Verification (In research) and their relation to the model and real world/experimental data.*
+
 
 **Error-** Also called absolute error, this is the measure of how far off from the true/correct value you are. If the actual value is not known, it can be the uncertainty ie plus or minus a certain amount in the same units as the measurement
 
@@ -100,6 +107,8 @@ $$ M = \frac{V}{a} $$
 ## Sources
 Dr. Ning's 415 (Flight Vehicle Design) Textbook
 
+
 Several Google searches and random websites
 
 Wikipedia
+
