@@ -2,7 +2,7 @@
 
 ## Airfoil/Airplane Terms
 
-<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F1.bp.blogspot.com%2F-NY3Sz-JhfgM%2FW3VCQ7soa5I%2FAAAAAAAAANI%2F3iPiQWLd6kUN_3IjcpR2eA_TZxCzD2IcQCLcBGAs%2Fs1600%2Fangle%252Bof%252Bcontact%252B2.png&f=1&nofb=1" width="400" height="300" />
+<img src="https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2F1.bp.blogspot.com%2F-NY3Sz-JhfgM%2FW3VCQ7soa5I%2FAAAAAAAAANI%2F3iPiQWLd6kUN_3IjcpR2eA_TZxCzD2IcQCLcBGAs%2Fs1600%2Fangle%252Bof%252Bcontact%252B2.png&f=1&nofb=1" width="500" height="300" />
 
 *Figure 1: Diagram of Basic Aerodynamics Terms and their locations on an airfoil.*
 
