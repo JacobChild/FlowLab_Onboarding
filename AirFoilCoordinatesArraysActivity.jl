@@ -55,16 +55,25 @@ zbar_calculations(c,p,x)
 Takes in c, p, and x values and outputs zbar 
 """
 function zbar_calculations(c,p,x)
+    zbar = 0.0
     for i in x
         if i <= p
              zbar = c.*(2*p*x .- x.^2)/(p^2)
+             println("first if statement")
+             println(zbar)
         elseif i > p
              zbar = c.*(1 - 2*p .+ 2*p*x .- x.^2)/((1-p)^2)
+             println("elseif statement")
+             println(zbar)
         else 
              zbar = "you wenti"
+             break
+             
+             println(zbar)
         end
+        println("You made it in the big for loop")
     end
-    
+    println(zbar)
     return zbar
 end
 
@@ -98,13 +107,15 @@ using DataFrames #only seems to work in the Julia REPL
 
 DataFrame()
 
-Data = DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl, "Thickness" => TArray, "Zbar" => zbar)
+Data = DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl, "Thickness" => TArray)
 
 display(Data)
 
 #look into aspect ratio for plots 
  using Plots
- plot(x,zu)
+ plt = plot(x,zu)
  plot!(x,zl)
+
+ display(plt)
  
  #has error somewhere
