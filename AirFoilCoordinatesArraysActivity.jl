@@ -36,7 +36,7 @@ function user_input()
     t = t/100
     println("\n t:", t)
 
-    return c, p, t
+    return c, p, t, input1
 end
 
 """
@@ -55,25 +55,23 @@ zbar_calculations(c,p,x)
 Takes in c, p, and x values and outputs zbar 
 """
 function zbar_calculations(c,p,x)
-    zbar = 0.0
+    zbar = Float64[] #makes zbar an array of zeros the length of x, hopefully?
     for i in x
         if i <= p
-             zbar = c.*(2*p*x .- x.^2)/(p^2)
-             println("first if statement")
-             println(zbar)
+             zbarInput = c*(2*p*i - i^2)/(p^2)
+             push!(zbar,zbarInput)
+            
         elseif i > p
-             zbar = c.*(1 - 2*p .+ 2*p*x .- x.^2)/((1-p)^2)
-             println("elseif statement")
-             println(zbar)
+             zbarInput = c*(1 - 2*p + 2*p*i - i^2)/((1-p)^2)
+             push!(zbar,zbarInput)
+             
         else 
              zbar = "you wenti"
              break
-             
-             println(zbar)
+            
         end
-        println("You made it in the big for loop")
+        
     end
-    println(zbar)
     return zbar
 end
 
@@ -92,9 +90,9 @@ end
 
 #Actual code- See how it goes 
 
-c, p, t = user_input()  #function to get user input
+c, p, t, fromuser = user_input()  #function to get user input
 #x = range(0,1,step=.1)  #creates an x range
-x = collect(0:0.10:1)
+x = collect(0:0.010:1)
 TArray = thickness_calculations.(x, t)   #calculates the thicknesses
 zbarn = zbar_calculations(c, p, x) #calculate and returns zbar
 zu, zl = zupper_lower(zbarn, TArray) #calculates and returns zupper and z lower
@@ -107,15 +105,16 @@ using DataFrames #only seems to work in the Julia REPL
 
 DataFrame()
 
-Data = DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl, "Thickness" => TArray)
+Data = DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl, "Thickness" => TArray, "Zbar" => zbarn)
 
 display(Data)
 
 #look into aspect ratio for plots 
  using Plots
- plt = plot(x,zu)
- plot!(x,zl)
+ plt = plot(x,zu)   #saving the plot to an element
+ plot!(x,zl)    #adding/updating to that plot
+ #Plot settings
+ plot!(xlims = (-.1, 1.1), title = ("NACA", fromuser), xlabel = "Position", ylabel = "Position")
+ plot!(aspectratio = :equal)
 
- display(plt)
- 
- #has error somewhere
+ display(plt)   #displaying the plot by calling the saved element
