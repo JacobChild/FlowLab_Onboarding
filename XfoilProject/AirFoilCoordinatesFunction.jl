@@ -7,6 +7,7 @@ May 20th, 2022
 
 This is a copy of AirFoilCoordinatesArraysActivity.jl and was copied to the XFoilFolder so
 calling it from the PolarPlotter would be easier.
+MODIFICATION HEADINGS ARE IN CAPS
 
 High Level Project Overview-
 Files in Project: ExtenderNSmoother.jl, PolarPlotter.jl, AirFoilCoordinatesFunction.jl 
@@ -37,6 +38,8 @@ Pseudocode- Take in NACA 4- Series Airfoil numbers- ie max camber (c),
     Goal = clean code, lots of well commented functions
 =#
 
+# TURNING THE WHOLE FILE INTO A FUNCTION 
+function AirFoilCoordinatesFunction()
 
 """
 user_input Function to take in the 4 NACA numbers
@@ -54,8 +57,8 @@ function user_input()
         x = (1/2) * (1 .- cos.(theta))  #should give proper Spacing, assuming c (chord length) = 1
 
     else
-        println("\nNot using Cosine Spacing")
-        x = collect(0:0.1:1)   #10 points
+        println("\nNot using Cosine Spacing, 100 points")
+        x = collect(0:0.01:1)   #100 points
 
     end
 
@@ -128,24 +131,34 @@ TArray = thickness_calculations.(x, t)   #calculates the thicknesses
 zbarn = zbar_calculations(c, p, x) #calculate and returns zbar
 zu, zl = zupper_lower(zbarn, TArray) #calculates and returns zupper and z lower
 
-#outputs
 
-#println("\n \n", zu, "\n \n", zl) #for vs code
+# I DELETED ALL PLOTS AND OTHER OUTPUTS
+zun = vec(zu)
+zln = vec(zl)
+xnew = reverse(vec(x))
+xmid = pop!(xnew)
+xfinal = append!(xnew,xmid,reverse(xnew))
+pop!(reverse!(zun))
+#println(zun)
+pop!(reverse!(zln))
+zmid = 0
+#pop!(zl)
+zfinal = append!(vec(zun),zmid, reverse(vec(zln)))
+Xoutoffile = xfinal
+Youtoffile = zfinal
 
-using DataFrames #only seems to work in the Julia REPL
+#TROUBLESHOOTING BLOCK 
+#= println(zu)
+println(zl)
+println(xfinal)
+println(zun)
+println(zfinal)
+println(length(xfinal))
+println(length(zfinal))
 
-DataFrame()
+plot(xfinal,zfinal)
+plot!(xlims = (-.1, 1.1), title = ("NACA $fromuser"), xlabel = "Position", ylabel = "Position")
+plot!(aspectratio = :equal)  =#
 
-Data = DataFrame("X" => x, "Zupper"=> zu, "Zlower" => zl, "Thickness" => TArray, "Zbar" => zbarn)
-
-display(Data)
-
-#look into aspect ratio for plots 
- using Plots
- plt = plot(x,zu)   #saving the plot to an element
- plot!(x,zl)    #adding/updating to that plot
- #Plot settings
- plot!(xlims = (-.1, 1.1), title = ("NACA $fromuser"), xlabel = "Position", ylabel = "Position")
- plot!(aspectratio = :equal)
-
- display(plt)   #displaying the plot by calling the saved element
+return Xoutoffile, Youtoffile
+end
