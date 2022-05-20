@@ -15,6 +15,7 @@ if X<=p
 
 Pseudocode- Take in NACA 4- Series Airfoil numbers- ie max camber (c),
     max camber position (p), thickness (t), and an array (x) to plot at.
+    For example NACA 2412 = c: .02, p: .04, t: .12 (all in meters I believe)
     Do that by asking the user for c,p,t, then creating x (hardcode it for simplicity)
     Use the functions previously written to calculate zu and zl.
 
@@ -28,15 +29,31 @@ user_input Function to take in the 4 NACA numbers
 function user_input()
     println("Input the 4 NACA numbers ie 2412 \nNACA ")
     input1 = readline()
+    println("\nDo you want Cosine Spacing? 1 = Yes, 0 = No\n")
+    input2 = readline()
+    if input2 == "1"
+        println("\nHow many points do you want?\n")
+        stepsize = pi / parse(Int64,readline() )
+        #println("\n", stepsize)
+        theta = collect(0.0:stepsize:pi)    #creates numbers from 0 to pi
+        x = (1/2) * (1 .- cos.(theta))  #should give proper Spacing, assuming c (chord length) = 1
+
+    else
+        println("\nNot using Cosine Spacing")
+        x = collect(0:0.1:1)   #10 points
+
+    end
+
+
     c = parse(Int64, input1[1])
-    c = c//100  #converts the chord to the proper units
+    c = c/100  #converts the chord to the proper units   #can do c//100 and that leaves it in fraction form
     p = parse(Int64, input1[2])
-    p = p/10    #converts the chord position to the proper units
+    p = p/10    #converts the max camber position to the proper units
     t = parse(Int64, input1[3:4])
     t = t/100
-    println("\n t:", t)
+    #println("\n c:", c, "\n p:", p, "\n t:", t)    #prints out the actual NACA values
 
-    return c, p, t, input1
+    return c, p, t, input1, x
 end
 
 """
@@ -90,9 +107,8 @@ end
 
 #Actual code- See how it goes 
 
-c, p, t, fromuser = user_input()  #function to get user input
-#x = range(0,1,step=.1)  #creates an x range
-x = collect(0:0.010:1)
+c, p, t, fromuser, x = user_input()  #function to get user input
+#why is collect better than x = range(0:0.010:1)?
 TArray = thickness_calculations.(x, t)   #calculates the thicknesses
 zbarn = zbar_calculations(c, p, x) #calculate and returns zbar
 zu, zl = zupper_lower(zbarn, TArray) #calculates and returns zupper and z lower
@@ -114,7 +130,7 @@ display(Data)
  plt = plot(x,zu)   #saving the plot to an element
  plot!(x,zl)    #adding/updating to that plot
  #Plot settings
- plot!(xlims = (-.1, 1.1), title = ("NACA", fromuser), xlabel = "Position", ylabel = "Position")
+ plot!(xlims = (-.1, 1.1), title = ("NACA $fromuser"), xlabel = "Position", ylabel = "Position")
  plot!(aspectratio = :equal)
 
  display(plt)   #displaying the plot by calling the saved element
