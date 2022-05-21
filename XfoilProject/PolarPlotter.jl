@@ -21,8 +21,13 @@ be called and used  to generate the polar plots from -10deg to 15deg.
 
 =#
 
-#Needed Packages
-using Xfoil, Printf, DataFrames, Plots
+
+#TURNING THE WHOLE FILE INTO A FUNCTION
+#TO UNDO UNCOMMENT/COMMENT ANYTHING BY CAPPED HEADINGS
+function PolarPlotter() 
+
+#Needed Packages TURNED OFF FOR FUNCTION
+#using Xfoil, Printf, DataFrames, Plots
 
 #FUNCTIONS
 function readfile(filename)
@@ -115,16 +120,18 @@ for i = 1:n
     #for some reason it isn't converging on the last one?
 end
 
-#Present Data
-DataFrame()
+#Present Data TURNED OFF FOR FUNCTION 
+#= DataFrame()
 
 Data = DataFrame("Angle" => alpha, "Cl"=> Cl, "Cd" => Cd, "Cdp" => Cdp, "Cm" => Cm, "Convergence" => Converged)
 
 display(Data)
 
-#Couldn't get the plot to work?
 Plot1 = plot(x,y)
 plot!(xlims = (-.1, 1.1), title = ("NACA Airfoil"), xlabel = "Position", ylabel = "Position")
 plot!(aspectratio = :equal)
 println(x)
-display(Plot1)
+display(Plot1) =#
+
+return alpha, Cl, Cd, Cdp, Cm
+end
