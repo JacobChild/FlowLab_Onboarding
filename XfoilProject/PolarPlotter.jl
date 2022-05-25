@@ -49,7 +49,8 @@ function fluidconditions()
     Re = 10000
     mach = 0
     ncrit = 7
-    alpha = -10:1:15
+    #alpha = -10:1:15
+    alpha = -1.0:1:10.0
     #=
     println("Input the Reynolds Number\n")
     Re = readline()
@@ -72,8 +73,8 @@ end
 
 #MAIN CODE
 userinput1 = 1; #1 is the default "Match case"
-#Uncomment to run other than default
 
+#UserInput
 println("Input one of the following\n1 Default NACA 2412 \n2 Load File \n3 Create Profile ")
 userinput1 = readline()
 userinput1 = parse(Int64, userinput1)
@@ -102,7 +103,7 @@ end
 
 #Solve for the Polars
 Xfoil.set_coordinates(x,y)
-Xfoil.pane()    #this "panes" the coordinates, not sure what it does, smooths I think?
+Xfoil.pane(;npan = 160)    #this "panes" the coordinates, not sure what it does, smooths I think?
 Re, mach, alpha, ncrit = fluidconditions()
 
 #OUTPUTS
@@ -119,14 +120,15 @@ for i = 1:n
     #The above calculates the coefficients at each angle (i of alpha)
     #for some reason it isn't converging on the last one?
 end
-
+@show Converged
 #Present Data TURNED OFF FOR FUNCTION 
-#= DataFrame()
+ DataFrame()
 
 Data = DataFrame("Angle" => alpha, "Cl"=> Cl, "Cd" => Cd, "Cdp" => Cdp, "Cm" => Cm, "Convergence" => Converged)
 
 display(Data)
 
+#=
 Plot1 = plot(x,y)
 plot!(xlims = (-.1, 1.1), title = ("NACA Airfoil"), xlabel = "Position", ylabel = "Position")
 plot!(aspectratio = :equal)

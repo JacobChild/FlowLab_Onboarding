@@ -38,7 +38,7 @@ Pseudocode- Take in NACA 4- Series Airfoil numbers- ie max camber (c),
     Goal = clean code, lots of well commented functions
 =#
 
-# TURNING THE WHOLE FILE INTO A FUNCTION 
+# TURNING THE WHOLE FILE INTO A FUNCTION
 function AirFoilCoordinatesFunction()
 
 """

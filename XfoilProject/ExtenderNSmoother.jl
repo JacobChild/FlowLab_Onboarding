@@ -19,6 +19,7 @@ smoothing and then extrapolating or extrapolating then smoothing.
 Updated Pseudocode
 The Extending function goes from -pi to pi and thus must also take in radians, so convert alpha to rads 
 
+    cd("C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject")
 =#
 
 #Packages needed for ALL files in Project to run
@@ -27,25 +28,30 @@ include("PolarPlotter.jl")
 
 #functions
 function smoother(Coef,alpharads, amount)
-    Spline1 = Spline1D(alpharads, Coef; w=ones(length(alpharads)), k=3, bc="nearest", s=amount)
+    #From the Dierckx package, creates a 1-D spline to the kth order with an "s" smoothing amount.
+    #bc = boundary conditions and specifies what to do outside of the min/max range, it can be *nearest*, zero, extrapolate, or error
+    Spline1 = Spline1D(alpharads, Coef; w=ones(length(alpharads)), k=3, bc="nearest", s=amount) 
     SmoothCoef = evaluate(Spline1, alpharads)
     return SmoothCoef
 end
 
 #Import Needed Data
-alpha, Cl, Cd, Cdp, Cm = PolarPlotter()
-alpharads = alpha*pi/180    #alpha needs to be in rads for the viterna extension function
+alpha, Cl, Cd, Cdp, Cm = PolarPlotter() #Calls my PolarPlotter function/file which uses Xfoil to get the needed data.
+alpharads = alpha.*(pi/180)   #alpha needs to be in rads for the viterna extension function
 
 #To see the difference 1/4
+#Parts 1-4 were used during original coding to compare differences in plots
+#not needed in final version, but kept for future troubleshooting 
 ClPlot1 = plot(alpharads, Cl)
 CdPlot1 = plot(alpharads, Cd) 
 CdpPlot1= plot(alpharads, Cdp)
 CmPlot1 = plot(alpharads, Cm)
 
-
+ 
 #Smoothing 
+#This calls the smoother function to smooth out the current data, the 3rd input is the smoothing amount
 SmoothCl = smoother(Cl,alpharads,.017)
-SmoothCd = smoother(Cd,alpharads,.017)
+SmoothCd = smoother(Cd,alpharads,.01)
 SmoothCdp = smoother(Cdp,alpharads,.017)
 SmoothCm = smoother(Cm,alpharads,.017)
 
@@ -57,60 +63,65 @@ SmoothCdpPlot = plot(alpharads, SmoothCdp)
 SmoothCmPlot = plot(alpharads, SmoothCm)
 
 #Extrapolating/Extending
-cr75 = 1    #chord/Rtip at 75%Rtip? Rtip = tip radius
+cr75 = 1.0    #chord/Rtip at 75%Rtip? Rtip = tip radius
+#Uses the viterna function from the CCBlade package to extend the values we have from -pi to pi
 newalpharads, ExtendedCl, ExtendedCd = viterna(vec(alpharads), SmoothCl, SmoothCd, cr75)
-newalpharads, ExtendedCdp, ExtendedCm = viterna(vec(alpharads), SmoothCdp, SmoothCm, cr75)
+#The viterna method was not made for Cdp and Cm, thus those are not Extended
 
 #To see the difference 3/4
 ExtendedClPlot = plot(newalpharads, ExtendedCl)
 
 #Smoothing Extended Data
-ExtendedSmoothCl = smoother(ExtendedCl,newalpharads,.025)
-ExtendedSmoothCd = smoother(ExtendedCd,newalpharads,.025)
-ExtendedSmoothCdp = smoother(ExtendedCdp,newalpharads,.05)
-ExtendedSmoothCm = smoother(ExtendedCm,newalpharads,.05)
+ExtendedSmoothCl = smoother(ExtendedCl,newalpharads,.001)
+ExtendedSmoothCd = smoother(ExtendedCd,newalpharads,.005)
 
 #To see the difference 4/4
-#ExtendedSmoothClPlot = plot(newalpharads, SmoothClExtended)
 ExtendedSmoothClPlot = plot!(newalpharads, ExtendedSmoothCl)
-display(ExtendedClPlot)
 
-#Matrix Meddling
+"""
+Matrix Meddling
+This is to combine and arrange the data to prepare for plotting
+"""
+#Combines the alpharads (original and extended) arrays into 2 column vectors
 Combalpharads = cat(alpharads,alpharads, dims = (2,2))  #I don't fully understand what the dims does, but it works that way
 Combnewalpharads = cat(newalpharads, newalpharads, dims = (2,2))
 
+#combines the smoothed and non smoothed Cl values into 2 Col vectors 
 CombCl = cat(Cl, SmoothCl, dims = (2,2))
 CombExtendedCl = cat(ExtendedCl, ExtendedSmoothCl, dims = (2,2)) 
 
-CombCd = cat(Cl, SmoothCd, dims = (2,2))
+# as above, but Cd
+CombCd = cat(Cd, SmoothCd, dims = (2,2))
 CombExtendedCd = cat(ExtendedCd, ExtendedSmoothCd, dims = (2,2)) 
 
-CombCdp = cat(Cl, SmoothCl, dims = (2,2))
-CombExtendedCdp = cat(ExtendedCdp, ExtendedSmoothCdp, dims = (2,2))
+#As above, but Cdp
+CombCdp = cat(Cdp, SmoothCdp, dims = (2,2))
 
-CombCm = cat(Cl, SmoothCl, dims = (2,2))
-CombExtendedCm = cat(ExtendedCm, ExtendedSmoothCm, dims = (2,2)) 
+#As above, but Cm
+CombCm = cat(Cm, SmoothCm, dims = (2,2))
 
-#Plot Palooza
-CombClPlot = plot(Combalpharads,CombCl, title = "Cl Plots")
-CombExtendedClPlot = plot(Combnewalpharads, CombExtendedCl)
+
+"""
+Plot Palooza
+Saves the various plots as plot objects and combines all plot objects of a coefficient into one plot object
+"""
+CombClPlot = plot(Combalpharads,CombCl, title = "Cl Plots", label = ["Org" "Smooth"])
+CombExtendedClPlot = plot(Combnewalpharads, CombExtendedCl, label = ["Org" "Smooth"])
 FullClPlot = plot(CombClPlot,CombExtendedClPlot, layout = (2,1), legend = false)
 
-CombCdPlot = plot(Combalpharads,CombCd, title = "Cd Plots")
-CombExtendedCdPlot = plot(Combnewalpharads, CombExtendedCd)
+CombCdPlot = plot(Combalpharads,CombCd, title = "Cd Plots", label = ["Org" "Smooth"])
+CombExtendedCdPlot = plot(Combnewalpharads, CombExtendedCd, label = ["Org" "Smooth"])
 FullCdPlot = plot(CombCdPlot,CombExtendedCdPlot, layout = (2,1), legend = false)
 
-CombCdpPlot = plot(Combalpharads,CombCdp, title = "Cdp Plots")
-CombExtendedCdpPlot = plot(Combnewalpharads, CombExtendedCdp)
-FullCdpPlot = plot(CombCdpPlot,CombExtendedCdpPlot, layout = (2,1), legend = false)
+CombCdpPlot = plot(Combalpharads,CombCdp, title = "Cdp Plots", label = ["Org" "Smooth"])
 
-CombCmPlot = plot(Combalpharads,CombCm, title = "Cm Plots")
-CombExtendedCmPlot = plot(Combnewalpharads, CombExtendedCm)
-FullCmPlot = plot(CombCmPlot,CombExtendedCmPlot, layout = (2,1), legend = false)
+CombCmPlot = plot(Combalpharads,CombCm, title = "Cm Plots", label = ["Org" "Smooth"])
 
+#Creates an array of Plot objects (from the above Plot Palooza) and plots them
 PlotArray = []
 push!(PlotArray,FullClPlot)
 push!(PlotArray,FullCdPlot)
-push!(PlotArray,FullCdpPlot)
-push!(PlotArray,FullCmPlot)
+push!(PlotArray,CombCdpPlot)
+push!(PlotArray,CombCmPlot)
 plot(PlotArray...)
+plot!(size = (1000,900),legend = true)    #changes the plot size 
