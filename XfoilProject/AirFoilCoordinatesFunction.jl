@@ -155,10 +155,11 @@ println(zun)
 println(zfinal)
 println(length(xfinal))
 println(length(zfinal))
+=#
 
 plot(xfinal,zfinal)
 plot!(xlims = (-.1, 1.1), title = ("NACA $fromuser"), xlabel = "Position", ylabel = "Position")
-plot!(aspectratio = :equal)  =#
+plot!(aspectratio = :equal)  
 
 return Xoutoffile, Youtoffile
 end

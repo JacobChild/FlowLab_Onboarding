@@ -51,7 +51,7 @@ function fluidconditions()
     ncrit = 7
     #alpha = -10:1:15
     alpha = -1.0:1:10.0
-    #=
+    
     println("Input the Reynolds Number\n")
     Re = readline()
     Re = parse(Float64,Re)
@@ -61,9 +61,9 @@ function fluidconditions()
     println("Input the Ncrit multiplier")
     ncrit = readline()
     ncrit = parse(Float64, ncrit)
-    println("Assuming -10 to 15 deg with a 1 deg step size")
-    alpha = -10:1:15    #from -10 to 15 with a step size of 1
-    =#
+    println("Assuming -1 to 10 deg with a 1 deg step size")
+    #alpha = -10:1:15    #from -10 to 15 with a step size of 1
+   
     return Re, mach, alpha, ncrit
 
 end

@@ -50,10 +50,10 @@ CmPlot1 = plot(alpharads, Cm)
  
 #Smoothing 
 #This calls the smoother function to smooth out the current data, the 3rd input is the smoothing amount
-SmoothCl = smoother(Cl,alpharads,.017)
-SmoothCd = smoother(Cd,alpharads,.01)
-SmoothCdp = smoother(Cdp,alpharads,.017)
-SmoothCm = smoother(Cm,alpharads,.017)
+SmoothCl = smoother(Cl,alpharads,.0075)
+SmoothCd = smoother(Cd,alpharads,.0065)
+SmoothCdp = smoother(Cdp,alpharads,.005)
+SmoothCm = smoother(Cm,alpharads,.005)
 
 
 #To see the difference 2/4
@@ -77,6 +77,10 @@ ExtendedSmoothCd = smoother(ExtendedCd,newalpharads,.005)
 
 #To see the difference 4/4
 ExtendedSmoothClPlot = plot!(newalpharads, ExtendedSmoothCl)
+
+#Unit Conversion from radians to degrees, this is optional and could be dangerous as I am not changing the variable name
+alpharads = alpharads*180/pi
+newalpharads = newalpharads*180/pi
 
 """
 Matrix Meddling
