@@ -1,6 +1,6 @@
 # NACA 2412 Data and Discussion
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotFig.jpg" title="" alt="NACA2412Plot" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotFig.jpg" alt="NACA2412Plot" data-align="center" width="332">
 
 *Figure 1: A Plot of the NACA 2412 Airfoil. Generated using Cosine spacing and 20 points on both the top and bottom (for the source code see [Here](https://github.com/JacobChild/FlowLab_Onboarding/blob/9f6389461f356a878bb87c64cd1cda8c4b8043e0/AirFoilCoordinatesArraysActivity.jl))*
 
@@ -8,41 +8,55 @@
 
 **Note:** As smoothing a polar plot requires extensive user input and trial and error, only the first plot/case will be extended and smoothed, the rest will simply be given as is.
 
+ 
+
 **M = 0, Re = 10,000, Ncrit = 7**
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe10000M0N7.jpg" title="" alt="NACA2412Polar" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe10000M0N7.jpg" alt="NACA2412Polar" data-align="center" width="364">
 
 *Figure 2: Plot under the given conditions (M = 0, Re = 10,000, Ncrit = 7) at different angles of attack given in degrees (Originally -1 to 10 deg before extending). All the plots were smoothed, and the Cm and Cl plots were extended and smoothed from -pi to pi. For methods, see the source code linked in the appendix.*
 
+ 
+
 **M = 0, Re = 100000, Ncrit = 7**
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe100000M0N7.jpg" title="" alt="NACA2412Polar" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe100000M0N7.jpg" alt="NACA2412Polar" data-align="center" width="323">
 
 *Figure 3: Plot under the given conditions (M = 0, Re = 100000, Ncrit = 7) at different angles of attack given in degrees (from -10 to 15 deg)*
 
+ 
+
 **M = 0, Re = 1000000, Ncrit = 7**
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe1000000M0N7.jpg" title="" alt="FlowLab_Onboarding/NACA2412PlotRe1000000M0N7.jpg at f6e43fcf5526f132a274fbd0b73e05784ecc6aa7 · JacobChild/FlowLab_Onboarding · GitHub" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe1000000M0N7.jpg" alt="FlowLab_Onboarding/NACA2412PlotRe1000000M0N7.jpg at f6e43fcf5526f132a274fbd0b73e05784ecc6aa7 · JacobChild/FlowLab_Onboarding · GitHub" data-align="center" width="334">
 
 *Figure 4: Plot under the given conditions (M = 0, Re = 1000000, Ncrit = 7) at different angles of attack given in degrees (from -10 to 15 deg)*
 
+ 
+
 **M = 0.02, Re = 10000, Ncrit = 11**
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe10000M02N11.jpg" title="" alt="FlowLab_Onboarding/NACA2412PlotRe10000M02N11.jpg at f6e43fcf5526f132a274fbd0b73e05784ecc6aa7 · JacobChild/FlowLab_Onboarding · GitHub" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe10000M02N11.jpg" alt="FlowLab_Onboarding/NACA2412PlotRe10000M02N11.jpg at f6e43fcf5526f132a274fbd0b73e05784ecc6aa7 · JacobChild/FlowLab_Onboarding · GitHub" data-align="center" width="393">
 
 *Figure 5: Plot under the given conditions (M = 0.02, Re = 10000, Ncrit = 11) at different angles of attack given in degrees (from -10 to 15 deg)*
 
+ 
+
 **M = 0.02, Re = 100000, Ncrit = 11**
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe100000M02N11.jpg" title="" alt="Plot" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe100000M02N11.jpg" alt="Plot" data-align="center" width="383">
 
-*Figure 6: Plot under the given conditions (M = 0.02, Re = 100000, Ncrit = 11) at different angles of attack given in degrees (from -10 to 15 deg). It should be noted that My code failed under these conditions when not using the same coordinates as Xfoil, ie, it was neccessary to have more coordinate points than the default settings in PolarPlotter.jl to have converged results.*
+*Figure 6: Plot under the given conditions (M = 0.02, Re = 100000, Ncrit = 11) at different angles of attack given in degrees (from -10 to 15 deg). It should be noted that My code failed under these conditions when not using the same coordinates as Xfoil, ie, it was necessary to have more coordinate points than the default settings in PolarPlotter.jl to have converged results.*
+
+ 
 
 **M = 0.02, Re = 1000000, Ncrit = 11**
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe1000000M02N11.jpg" title="" alt="FlowLab_Onboarding/NACA2412PlotRe1000000M02N11.jpg at f6e43fcf5526f132a274fbd0b73e05784ecc6aa7 · JacobChild/FlowLab_Onboarding · GitHub" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe1000000M02N11.jpg" alt="FlowLab_Onboarding/NACA2412PlotRe1000000M02N11.jpg at f6e43fcf5526f132a274fbd0b73e05784ecc6aa7 · JacobChild/FlowLab_Onboarding · GitHub" data-align="center" width="371">
 
 *Figure 7: Plot under the given conditions (M = 0.02, Re = 1000000, Ncrit = 11) at different angles of attack given in degrees (from -10 to 15 deg)*
+
+### 
 
 ### Validation and Verification through Comparison of Results
 
@@ -89,16 +103,16 @@ The Experimental data and plots that were used can be found [here](https://arc.a
 
 - As the Experimental data was not tabulated, but was instead plotted, the estimated stall angle and Coefficient of lift at that angle will be reported and compared
 
-*Table 2: Comparision of the estimated stall angles and coefficients of lift under these conditions: Re = 3,100,000, M = 0, and Ncrit = 9. (Note a mach number was not specified, so M = 0 was assumed and used)*
+*Table 2: Comparison of the estimated stall angles and coefficients of lift under these conditions: Re = 3,100,000, M = 0, and Ncrit = 9. (Note a mach number was not specified, so M = 0 was assumed and used)*
 
 |                                              | XFoil  | MyCode | Experimental |
 | -------------------------------------------- | ------ | ------ | ------------ |
 | Estimated Stall Angle (deg)                  | 18     | 18     | 15           |
-| Coeffecient of Lift at estimated stall angle | 1.7689 | 1.7733 | 1.6          |
+| Coefficient of Lift at estimated stall angle | 1.7689 | 1.7733 | 1.6          |
 
 | ![myplot](C:\Users\child\Documents\Flow_Lab\Onboarding\XfoilProject\OutputImages\NACA2412PlotRe3100000M0N9.jpg) | ![expplot](C:\Users\child\Documents\Flow_Lab\Onboarding\XfoilProject\OutputImages\ExperimentalNACA2412Re3100000M0N9.jpg) |
 |:---------------------------------------------------------------------------------------------------------------:|:------------------------------------------------------------------------------------------------------------------------:|
-| *Figure 8: Theoretical ouput calculated from the PolarPlotter.jl code*                                          | *Figure 9: Experimental output found in a wind tunnel and cited in the link above*                                       |
+| *Figure 8: Theoretical output calculated from the PolarPlotter.jl code*                                         | *Figure 9: Experimental output found in a wind tunnel and cited in the link above*                                       |
 
 **Error Analysis**
 
@@ -125,9 +139,9 @@ The error between the theoretical and experimental data is quite large. It must 
 
 **Reynolds Number Trends**
 
-The Mach number and Ncrit values were left constant as the Reynolds number was varied under two different sets of conditions. A high Reynolds number means that the effects of inertia are greater then the effects of the velocity of the fluid. In simple terms this means the flow / boundary layer will become turbulent quicker. In the case of airfoils, turbulent boundary layers keep the flow attached to the airfoil, thus delaying flow seperation longer at higher Reynolds numbers.  When comparing the Coefficients of lift seen under the first set of conditions (for example), this effect can be seen. Tor an angle of attack of 10 degrees, Cl at Re = 10,000 is apx .4 and at Re = 100000 it is apx 1.2, and at Re = 1000000 it is apx 1.5. This shows that higher Reynolds numbers allow for the generation of more lift as the flow stays attached to the airfoil longer. 
+The Mach number and Ncrit values were left constant as the Reynolds number was varied under two different sets of conditions. A high Reynolds number means that the effects of inertia are greater then the effects of the velocity of the fluid. In simple terms this means the flow / boundary layer will become turbulent quicker. In the case of airfoils, turbulent boundary layers keep the flow attached to the airfoil, thus delaying flow separation longer at higher Reynolds numbers.  When comparing the Coefficients of lift seen under the first set of conditions (for example), this effect can be seen. Tor an angle of attack of 10 degrees, Cl at Re = 10,000 is apx .4 and at Re = 100000 it is apx 1.2, and at Re = 1000000 it is apx 1.5. This shows that higher Reynolds numbers allow for the generation of more lift as the flow stays attached to the airfoil longer. 
 
-These effects are even more apparent when looking at the Coefficient of Drag. A large portion of drag comes from "pressure drag", or the drag that comes because of the pressure differential between the front and trailing edge of the airfoil. This pressure differential is caused by flow seperation, so it follows that if there is less flow seperation there is less drag. These results are seen when comparing the Cd plots under the second condition at a 10 degree angle of attack (for example). At Re = 10000, Cd is approximatley 1.1, at Re = 100000 it is approximatley .04, and at Re = 1000000 it is approximatley .016. Thus, it can be seen that drag is drastically reduced with an increase of the Reynolds number.
+These effects are even more apparent when looking at the Coefficient of Drag. A large portion of drag comes from "pressure drag", or the drag that comes because of the pressure differential between the front and trailing edge of the airfoil. This pressure differential is caused by flow separation, so it follows that if there is less flow separation there is less drag. These results are seen when comparing the Cd plots under the second condition at a 10 degree angle of attack (for example). At Re = 10000, Cd is approximately 1.1, at Re = 100000 it is approximately .04, and at Re = 1000000 it is approximately .016. Thus, it can be seen that drag is drastically reduced with an increase of the Reynolds number.
 
  
 
@@ -139,13 +153,13 @@ As the angle of attack was varied from negative (nose down) to positive (nose up
 
 *Figure 10: Coefficient of lift with the slopes outlined at negative angles of attack. Taken from the M = 0.02, Re = 1000000, Ncrit = 11 Condition*
 
-The Coefficient of Drag displays more intuitive behavior in that as the angle of attack travels from negative to positive angle at which the least drag occurs is typically within a few degrees of 0. This makes sense as that is when the airfoil would be the most streamlined and the flow would be the least seperated, thus generating the least friction and pressure drag respectively. Keep in mind that as was already shown above the effects of pressure drag are much larger than friction drag, and thus the angles of attack at which flow seperation is larger are where the Coefficient of Drag is also much larger.
+The Coefficient of Drag displays more intuitive behavior in that as the angle of attack travels from negative to positive angle at which the least drag occurs is typically within a few degrees of 0. This makes sense as that is when the airfoil would be the most streamlined and the flow would be the least separated, thus generating the least friction and pressure drag respectively. Keep in mind that as was already shown above the effects of pressure drag are much larger than friction drag, and thus the angles of attack at which flow separation is larger are where the Coefficient of Drag is also much larger.
 
 The Coefficient of Moment in all cases stays negative within our range of angles of attack. A negative Coefficient of Moment means that the airfoil is wanting to pitch nose down *verify this*. This is desirable behavior as it means that the airfoil will resist stall (the angle at which an airfoil no longer produces more lift). The moment Coefficient is closely related to the other coefficients. In general both Lift and Drag give a positive moment to the airfoil (ie cause the nose to pitch up), *so where does the negative coefficient of moment come from?* This can be explained by the pressure distribution along the airfoil. At a higher angle of attack, both drag and lift will be trying to rotate the airfoil nose up, but a closer look at the pressure distribution shows that the locations and magnitudes of the pressure actually cause a negative moment coefficient. At higher Reynolds numbers as the angle of attack increases, the coefficient of moment generally becomes less negative, and at lower Reynolds numbers as the angle of attack increases, the coefficient of moment generally becomes more negative.
 
  
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/StallExample.jpg" title="" alt="StallExample" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/StallExample.jpg" alt="StallExample" data-align="center" width="390">
 
 *Figure 11: Example of the location of positive stall as outlined in the different plots. Taken from the M = 0.02, Re = 1000000, Ncrit = 11 Condition*
 
@@ -155,7 +169,7 @@ The Coefficient of Moment in all cases stays negative within our range of angles
 
 Stall occurs when at an angle of attack when the airfoil generates less and less lift rather than more than before. This typically happens at higher angles off attack, with relatively high (or rapidly increasing) coefficient of drag, and a very small moment coefficient (ie not a strong desire to pitch the nose down). These trends can be seen in Figure 11. Stall can also occur in the negative Coefficient of Lift region. This can happen when the airfoil is beginning to generate more positive lift (ie still negative lift but with a positive slope) and then suddenly becoming more negative again as previously shown in Figure 10. Negative stall also occurs when Cl is negative, but typically comes from the airfoil being inverted (extremely high or low angles of attack), and then just rotating out of its inversion as shown in Figure 12.
 
-<img src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NegativeStallExample.jpg" title="" alt="NegativeStallExample" data-align="center">
+<img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NegativeStallExample.jpg" alt="NegativeStallExample" data-align="center" width="290">
 
 *Figure 12: Negative stall example as shown on the extended plot. Taken from the M = 0.0, Re = 10000, Ncrit = 7 Condition*
 
@@ -163,7 +177,7 @@ Stall occurs when at an angle of attack when the airfoil generates less and less
 
 ### Conclusion
 
-A much deeper understanding of the Coefficients of Lift, Drag, and Moment were gained, as well as a more intuitive grasp of how they vary with angle of attack. A proficiancy at basic airfoil analysis, plotting, and comparison was gained, but with XFoil, and Xfoil.jl. Julia coding skills were improved with an increased knowledge of how to use functions in different files and how to use different math packages. The code was both validated and verified and will be safe to use (within normal conditions) in the future.
+A much deeper understanding of the Coefficients of Lift, Drag, and Moment were gained, as well as a more intuitive grasp of how they vary with angle of attack. A proficiency at basic airfoil analysis, plotting, and comparison was gained, but with XFoil, and Xfoil.jl. Julia coding skills were improved with an increased knowledge of how to use functions in different files and how to use different math packages. The code was both validated and verified and will be safe to use (within normal conditions) in the future.
 
  
 
@@ -189,6 +203,6 @@ A much deeper understanding of the Coefficients of Lift, Drag, and Moment were g
 
 [TempPolarPlotter.jl](https://github.com/JacobChild/FlowLab_Onboarding/blob/00d1b4217b55f39b4ca7fdd2090e0cdfc3032723/XfoilProject/TempPolarPlotter.jl)
 
-For all other code, output images, and this document (in MarkDown) see the [XfoilProject](https://github.com/JacobChild/FlowLab_Onboarding/tree/XFoil-Project-Branch/XfoilProject) folder on my Github. 
+For all other code, output images, and this document (in Markdown) see the [XfoilProject](https://github.com/JacobChild/FlowLab_Onboarding/tree/XFoil-Project-Branch/XfoilProject) folder on my GitHub. 
 
 *Note: All of these links currently take the user to a branch off of main. Once everything in the project has been validated and verified, a pull request will be created and this branch will be merged with Main. It is yet to be seen if the links will work once that happens.*
