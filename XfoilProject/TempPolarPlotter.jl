@@ -125,7 +125,7 @@ be called and used  to generate the polar plots from -10deg to 15deg.
     
     Data = DataFrame("Angle" => alpha, "Cl"=> Cl, "Cd" => Cd, "Cdp" => Cdp, "Cm" => Cm, "Convergence" => Converged)
     
-    display(Data)
+    show(Data, allrows=true)
     
     #=
     Plot1 = plot(x,y)
