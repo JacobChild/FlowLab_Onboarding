@@ -19,6 +19,12 @@ smoothing and then extrapolating or extrapolating then smoothing.
 Updated Pseudocode
 The Extending function goes from -pi to pi and thus must also take in radians, so convert alpha to rads 
 
+Sources:
+Xfoil.jl Documentation - https://flow.byu.edu/Xfoil.jl/dev/examples/
+Flow Math Documentation (ended up not using their smooth function) - http://flow.byu.edu/FLOWMath.jl/stable/#Smoothing-1
+Dierckx Documentation (for smoothing) - https://www.juliapackages.com/p/dierckx
+CCBlade Documentation (Viterna function used for extending) - https://flow.byu.edu/CCBlade.jl/stable/reference/
+
     cd("C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject")
 =#
 
