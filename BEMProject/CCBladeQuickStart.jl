@@ -7,6 +7,7 @@ Following the tutorial - https://flow.byu.edu/CCBlade.jl/stable/tutorial/
 
 PseudoCode- from UIUC do an analysis of a thin 10 x 5 propeller, 10 means diameter of 10inches
 
+cd("C:/Users/child/Documents/Flow_Lab/Onboarding/BEMProject")
 =#
 
 #Packages
