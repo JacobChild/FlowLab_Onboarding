@@ -36,7 +36,7 @@ The NACA 2412 airfoil was created, plotted, and then analyzed under different co
 
 <img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotFig.jpg" alt="NACA2412Plot" data-align="center" width="332">
 
-*Figure 1: A Plot of the NACA 2412 Airfoil. Generated using Cosine spacing and 20 points on both the top and bottom (for the source code see [Here](https://github.com/JacobChild/FlowLab_Onboarding/blob/9f6389461f356a878bb87c64cd1cda8c4b8043e0/AirFoilCoordinatesArraysActivity.jl))*
+*Figure 1: A plot of the NACA 2412 Airfoil. Generated using cosine spacing and 20 points on both the top and bottom (for the source code see [Here](https://github.com/JacobChild/FlowLab_Onboarding/blob/9f6389461f356a878bb87c64cd1cda8c4b8043e0/AirFoilCoordinatesArraysActivity.jl))*
 
 ### NACA 2412 Polar Plots Under Various Conditions
 
@@ -70,7 +70,7 @@ The NACA 2412 airfoil was created, plotted, and then analyzed under different co
 
 <img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NACA2412PlotRe100000M02N11.jpg" alt="Plot" data-align="center" width="383">
 
-*Figure 6: Plot under the given conditions (M = 0.02, Re = 100000, Ncrit = 11) at different angles of attack given in degrees (from -10 to 15 deg). It should be noted that My code failed under these conditions when not using the same coordinates as Xfoil, ie, it was necessary to have more coordinate points than the default settings in PolarPlotter.jl to have converged results.*
+*Figure 6: Plot under the given conditions (M = 0.02, Re = 100000, Ncrit = 11) at different angles of attack given in degrees (from -10 to 15 deg). It should be noted that my code failed under these conditions when not using the same coordinates as Xfoil, ie, it was necessary to have more coordinate points than the default settings in PolarPlotter.jl to have converged results.*
 
 **M = 0.02, Re = 1000000, Ncrit = 11**
 
@@ -94,7 +94,7 @@ The NACA 2412 airfoil was created, plotted, and then analyzed under different co
   
   - *Note: Xfoil.jl uses 140 panels by default, Xfoil uses 160, when I updated the panels it matched*
   
-  *Table 1: Coefficient of Lift Comparison between Xfoil, My code, and Airfoiltools.com at various angles of attack*
+  *Table 1: Coefficient of lift comparison between Xfoil, My code, and Airfoiltools.com at various angles of attack*
 
 | Angle | Xfoil  | MyCode  | Online |
 |:-----:|:------:|:-------:|:------:|
@@ -105,25 +105,28 @@ The NACA 2412 airfoil was created, plotted, and then analyzed under different co
 **Error Analysis**
 
 ```matlab
-mycode = m
-xfoil = x
-m = -.05884
-x = -.0589
-maxtrue = 1.1591
+%Error calculations at the 0 degree angle of attack
+% at 0 deg the calculations appear to be the furthest off, so this
+%will give us the worst case scenario
+m = -.05884;     %the value from my code at 0 degs
+x = -.0589;   %the value from xfoil at 0 degs
 
 RelativeError = (m-x)/x*100 => -0.10186757%
-MaxRelativeError = (m-x)/maxtrue*100 => 0.00517643%
 ```
+
+ 
 
 **Validation Error Discussion**
 
-Using the same coordinate file, and changing the number of panes in my adapted xfoil.jl code led to very little error. Double checking the Xfoil results with online validated that the test was being run with all of the correct inputs. While there is very little error, it is important to discuss the source of what error there is. My code does not use the exact same solver that xfoil does. After discussion with Judd Mehr (*is that who it was?*) it was learned that Xfoil.jl has additional methods built in to help the solver converge to a solution. Further digging that my code converged on all given output points, however Xfoil did not. Thus the source of the "error" was revealed and can be safely assumed to be within allowed tolerances with a relative error of less than a percent.
+Using the same coordinate file, and changing the number of panes in my adapted xfoil.jl code led to very little relative error between the Xfoil output and my adapted Xfoil.jl output. Double checking the Xfoil results with online validated that the test was being run with all of the correct inputs. While there is very little error, it is important to discuss the source of what error there is. My code (ie the Julia wrapper) uses the exact same solver as Xfoil but has some additional helps built in that could cause differences. After discussion with Taylor McDonald I learned that Xfoil.jl has additional methods built in to help the solver converge to a solution (ie "percussive maintenance" etc). Further inspection of my code and results revealed that it converged on all given output points, however Xfoil did not. Thus the source of the "error" was revealed and can be safely assumed to be within allowed tolerances with a relative error of less than a percent.
+
+ 
 
 **Verification through comparison with experimental data**
 
-The Experimental data and plots that were used can be found [here](https://arc.aiaa.org/doi/pdfplus/10.2514/6.2018-1277.c1)
+The experimental data and plots that were used can be found [here](https://arc.aiaa.org/doi/pdfplus/10.2514/6.2018-1277.c1)
 
-- As the Experimental data was not tabulated, but was instead plotted, the estimated stall angle and Coefficient of lift at that angle will be reported and compared
+- As the experimental data was not tabulated, but was instead plotted, the estimated stall angle and Coefficient of lift at that angle will be reported and compared
 
 *Table 2: Comparison of the estimated stall angles and coefficients of lift under these conditions: Re = 3,100,000, M = 0, and Ncrit = 9. (Note a mach number was not specified, so M = 0 was assumed and used)*
 
@@ -139,27 +142,28 @@ The Experimental data and plots that were used can be found [here](https://arc.a
 **Error Analysis**
 
 ```matlab
-mycode = m
-experimental =  e
+%Relative error analysis 
+m = 18;     %predicted from "my code" and xfoil
+e = 15;    %the experimental stall angle as shown in the plot
 
 %Stall angle error
 RelativeStallAngleError = (m - e) / e * 100
 = 20.0%
 
-%Cl error
+%Cl error- m and e were redefined with the appropriate Cl values
 RelativeClError = (m - e) / e * 100
 = 10.83%
 ```
 
 **Verification Error Discussion**
 
-The error between the theoretical and experimental data is quite large. It must be remembered however, that the Experimental data points were estimated off of a plot, it was assumed that M = 0, and there were unknown assumptions made by the  original researchers. It follows that the aggregation of these error sources would lead to a quite large error overall. The general trends that we see with the theoretical data match what we would expect to see- the theoretical model performs better (not stalling until later), than the real life model, and the linear region and shape of the curve also generally match between cases. 
+The error between the theoretical and experimental data is quite large. It must be remembered however, that the experimental data points were estimated off of a plot, it was assumed that M = 0, and there were unknown assumptions made by the  original researchers. It follows that the aggregation of these error sources would lead to a quite large error overall. The general trends that we see with the theoretical data match what we would expect to see- the theoretical model performs better (not stalling until later), than the real life model, and the linear region and shape of the curve also generally match between cases. The theoretical model overpredicting performance of the airfoil can be quite dangerous as expecting the airfoil to perform one way and it falling short could lead to loss of life. 
 
 ### Overall Discussion
 
 **Reynolds Number Trends**
 
-The Mach number and Ncrit values were left constant as the Reynolds number was varied under two different sets of conditions. A high Reynolds number means that the effects of inertia are greater then the effects of the velocity of the fluid. In simple terms this means the flow / boundary layer will become turbulent quicker. In the case of airfoils, turbulent boundary layers keep the flow attached to the airfoil, thus delaying flow separation longer at higher Reynolds numbers.  When comparing the Coefficients of lift seen under the first set of conditions (for example), this effect can be seen. Tor an angle of attack of 10 degrees, Cl at Re = 10,000 is apx .4 and at Re = 100000 it is apx 1.2, and at Re = 1000000 it is apx 1.5. This shows that higher Reynolds numbers allow for the generation of more lift as the flow stays attached to the airfoil longer. 
+The Mach number and Ncrit values were left constant as the Reynolds number was varied under two different sets of conditions. A high Reynolds number means that the effects of inertia are greater then the effects of the viscosity of the fluid. In simple terms this means the flow / boundary layer will become turbulent quicker. In the case of airfoils, turbulent boundary layers keep the flow attached to the airfoil, thus delaying flow separation longer at higher Reynolds numbers.  When comparing the coefficients of lift seen under the first set of conditions (for example), this effect can be seen in the higher Cl values. While turbulence and delayed flow separation play a part in increased lift, higher flow velocity is a larger cause of the increase in lift. With the fluid properties kept the same, a higher Reynolds number comes from a higher fluid velocity. For an angle of attack of 10 degrees, Cl at Re = 10,000 is apx .4 and at Re = 100000 it is apx 1.2, and at Re = 1000000 it is apx 1.5. This shows that higher Reynolds numbers allow for the generation of more lift due to the flow velocity increasing and that same flow staying attached to the airfoil longer. As the Reynolds number increases the slope (or rate of increase) of the coefficient of lift also becomes greater, meaning that the coefficient of lift increases more per degree at higher Reynolds numbers than lower numbers.
 
 These effects are even more apparent when looking at the Coefficient of Drag. A large portion of drag comes from "pressure drag", or the drag that comes because of the pressure differential between the front and trailing edge of the airfoil. This pressure differential is caused by flow separation, so it follows that if there is less flow separation there is less drag. These results are seen when comparing the Cd plots under the second condition at a 10 degree angle of attack (for example). At Re = 10000, Cd is approximately 1.1, at Re = 100000 it is approximately .04, and at Re = 1000000 it is approximately .016. Thus, it can be seen that drag is drastically reduced with an increase of the Reynolds number.
 
@@ -173,7 +177,7 @@ As the angle of attack was varied from negative (nose down) to positive (nose up
 
 The Coefficient of Drag displays more intuitive behavior in that as the angle of attack travels from negative to positive angle at which the least drag occurs is typically within a few degrees of 0. This makes sense as that is when the airfoil would be the most streamlined and the flow would be the least separated, thus generating the least friction and pressure drag respectively. Keep in mind that as was already shown above the effects of pressure drag are much larger than friction drag, and thus the angles of attack at which flow separation is larger are where the Coefficient of Drag is also much larger.
 
-The Coefficient of Moment in all cases stays negative within our range of angles of attack. A negative Coefficient of Moment means that the airfoil is wanting to pitch nose down *verify this*. This is desirable behavior as it means that the airfoil will resist stall (the angle at which an airfoil no longer produces more lift). The moment Coefficient is closely related to the other coefficients. In general both Lift and Drag give a positive moment to the airfoil (ie cause the nose to pitch up), *so where does the negative coefficient of moment come from?* This can be explained by the pressure distribution along the airfoil. At a higher angle of attack, both drag and lift will be trying to rotate the airfoil nose up, but a closer look at the pressure distribution shows that the locations and magnitudes of the pressure actually cause a negative moment coefficient. At higher Reynolds numbers as the angle of attack increases, the coefficient of moment generally becomes less negative, and at lower Reynolds numbers as the angle of attack increases, the coefficient of moment generally becomes more negative.
+The Coefficient of Moment in all cases stays negative within our range of angles of attack. A negative Coefficient of Moment means that the airfoil is wanting to pitch nose down. This is desirable behavior as it means that the airfoil will resist stall (the angle at which an airfoil no longer produces more lift). The moment Coefficient is closely related to the other coefficients. In general both Lift and Drag give a positive moment to the airfoil (ie cause the nose to pitch up), *so where does the negative coefficient of moment come from?* This can be explained by the pressure distribution along the airfoil. At a higher angle of attack, both drag and lift will be trying to rotate the airfoil nose up, but a closer look at the pressure distribution shows that the locations and magnitudes of the pressure actually cause a negative moment coefficient. At higher Reynolds numbers as the angle of attack increases, the coefficient of moment generally becomes less negative, and at lower Reynolds numbers as the angle of attack increases, the coefficient of moment generally becomes more negative.
 
 <img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/StallExample.jpg" alt="StallExample" data-align="center" width="390">
 
@@ -181,7 +185,7 @@ The Coefficient of Moment in all cases stays negative within our range of angles
 
 **Stall Trends**
 
-Stall occurs when at an angle of attack when the airfoil generates less and less lift rather than more than before. This typically happens at higher angles off attack, with relatively high (or rapidly increasing) coefficient of drag, and a very small moment coefficient (ie not a strong desire to pitch the nose down). These trends can be seen in Figure 11. Stall can also occur in the negative Coefficient of Lift region. This can happen when the airfoil is beginning to generate more positive lift (ie still negative lift but with a positive slope) and then suddenly becoming more negative again as previously shown in Figure 10. Negative stall also occurs when Cl is negative, but typically comes from the airfoil being inverted (extremely high or low angles of attack), and then just rotating out of its inversion as shown in Figure 12.
+Stall occurs when at an angle of attack when the airfoil generates less and less lift rather than more than before. This typically happens at higher angles off attack, with relatively high (or rapidly increasing) coefficient of drag, and a very small moment coefficient (ie not a strong desire to pitch the nose down). These trends can be seen in figure 11. Stall can also occur in the negative Coefficient of Lift region. This can happen when the airfoil is beginning to generate more positive lift (ie still negative lift but with a positive slope) and then suddenly becoming more negative again as previously shown in figure 10. Negative stall also occurs when Cl is negative, but typically comes from the airfoil being inverted (extremely high or low angles of attack), and then just rotating out of its inversion as shown in figure 12.
 
 <img title="" src="file:///C:/Users/child/Documents/Flow_Lab/Onboarding/XfoilProject/OutputImages/NegativeStallExample.jpg" alt="NegativeStallExample" data-align="center" width="290">
 
