@@ -76,19 +76,76 @@ Omega = 5400*pi/30  #converts rpm to rad/s, derivation: rpm*pi*360deg/(60sec*180
 rho = 1.225     #density of the air in metric
 
 op = simple_op.(Vinf, Omega, r, rho)    #calls simple_op to define "operating points" at each section
-#fieldnames(typeof(op[1]))
-show(op)
+#fieldnames(typeof(op[1])) shows that each op pt contains the velocity components, density, pitch   
+#mu (dynamic viscosity?), and the speed of sound (not sure why that is needed)
 
 
 #Solve with the Blade Element Method 
 out = solve.(Ref(rotor), sections, op)  #outputs a struct of results for each section/radial location?
-
+# struct outputs can be found [here](https://flow.byu.edu/CCBlade.jl/stable/reference/#Output-Struct)
 
 #Plots and Data analysis
 
+#Plot Forces
 figure()
-plot(r/Rtip, out.Np)    #plots location (as percent of radius) and ?
-plot(r/Rtip, out.Tp)
+plot(r/Rtip, out.Np)    #plots location (as percent of radius) and the normal force per unit length 
+plot(r/Rtip, out.Tp) #plots "" and the tangential force per unit length 
 xlabel("r/Rtip")
 ylabel("distributed loads (N/m)")
-legend(["flapwise", "lead-lag"])
+legend(["flapwise (normal force", "lead-lag (tangential force)"])
+
+#Plot induced velocities, can be used for future interaction calculations
+figure()
+plot(r/Rtip, out.u/Vinf) #axial induced velocity/Inflow velocity, so it is a percent, ie normalized
+plot(r/Rtip, out.v/Vinf) #tangential induced velocity (swirl)/""...
+xlabel("r/Rtip")
+ylabel("Induced velocity at rotor disk (normalized)")
+legend(["axial velocity", "swirl velocity"])
+
+
+#Prep for Coefficient analysis (thrust, power efficiency etc) at different advance ratios
+#Advance ratio = ratio of forward speed/ (rotational speed times prop diameter)
+
+#Inputs
+nJ = 20     #number of advance ratios to evaluate
+J = range(.1, .6, length = nJ) #creates a range of advance ratios from .1 to .6, what are normal vals?
+Omega = 5400.0*pi/30  #rpms to rad/sec 
+n = Omega/(2*pi)    # converts radians persecond to just rotations per second, same as rpm/60
+D = 2 * Rtip    #Diameter of the prop is 2* the radius, do I ignore the hub?
+
+eff = zeros(nJ)     #creates arrays for efficiency, coef of thrust, and coef of torque 
+CT = zeros(nJ)
+Cq = zeros(nJ)      #coef of torque is requried torque over theoretical required torque
+
+#Coef Solver
+
+for i = 1:nJ
+    local Vinf = J[i] * D * n   #makes a local inflow veloc var at each advance ratio 
+
+    local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
+    outputs = solve.(Ref(rotor), sections, op) #uses all data from above plus local op conditions
+    T, Q = thrusttorque(rotor, sections, outputs)   #calcs T & Q at each sec w/given conditions
+    eff[i], CT[i], CQ[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
+    # calcs the coef of each panel under the given conditions
+end
+
+#Prep to compare to experimental data 
+exp = [
+0.113   0.0912   0.0381   0.271
+0.145   0.0890   0.0386   0.335
+0.174   0.0864   0.0389   0.387
+0.200   0.0834   0.0389   0.429
+0.233   0.0786   0.0387   0.474
+0.260   0.0734   0.0378   0.505
+0.291   0.0662   0.0360   0.536
+0.316   0.0612   0.0347   0.557
+0.346   0.0543   0.0323   0.580
+0.375   0.0489   0.0305   0.603
+0.401   0.0451   0.0291   0.620
+0.432   0.0401   0.0272   0.635
+0.466   0.0345   0.0250   0.644
+0.493   0.0297   0.0229   0.640
+0.519   0.0254   0.0210   0.630
+0.548   0.0204   0.0188   0.595
+0.581   0.0145   0.0162   0.520
+]
