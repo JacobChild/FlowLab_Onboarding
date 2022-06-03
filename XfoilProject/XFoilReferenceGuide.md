@@ -53,7 +53,7 @@ Not a CAD program etc...
 
 
 ### Definitions -
-Panel Method- Discretizing an airfoil/wing by breaking it up into "panels" with the boundary conditions specified each panel can be analyzed and given a vortex to simulate the fluid flow for that panel.
+Panel Method- Discretizing an airfoil/wing by breaking it up into "panels". The boundary conditions are specified, like know flow through the surface, and freestream velocity at a certain distance etc, and then each panel is given a "fluid element" (typically a vortex) that will create those flow conditions. Essentially each panel will have a point at which there is a vortex creating the flow conditions desired, and a point at which calculations are done to verify the flow conditions (called the collocation point). The effects of all of the panels can then be summed to give the entire flow field around the surface with the desired conditions. It can be applied to both 2d and 3d objects and helps with complex calculations. It is important to remember that the panels must be sufficiently small to provide the level of accuracy you want. An awesome resource can be found [here](https://open.oregonstate.education/intermediate-fluid-mechanics/chapter/the-panel-method-an-introduction/)
 
 Ncrit- An amplification factor for the smoothness of the airflow approaching the airfoil. 
 
