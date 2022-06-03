@@ -114,13 +114,9 @@ x = -.0589;   %the value from xfoil at 0 degs
 RelativeError = (m-x)/x*100 => -0.10186757%
 ```
 
- 
-
 **Validation Error Discussion**
 
 Using the same coordinate file, and changing the number of panes in my adapted xfoil.jl code led to very little relative error between the Xfoil output and my adapted Xfoil.jl output. Double checking the Xfoil results with online validated that the test was being run with all of the correct inputs. While there is very little error, it is important to discuss the source of what error there is. My code (ie the Julia wrapper) uses the exact same solver as Xfoil but has some additional helps built in that could cause differences. After discussion with Taylor McDonald I learned that Xfoil.jl has additional methods built in to help the solver converge to a solution (ie "percussive maintenance" etc). Further inspection of my code and results revealed that it converged on all given output points, however Xfoil did not. Thus the source of the "error" was revealed and can be safely assumed to be within allowed tolerances with a relative error of less than a percent.
-
- 
 
 **Verification through comparison with experimental data**
 
