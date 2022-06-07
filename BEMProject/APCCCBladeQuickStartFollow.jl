@@ -10,7 +10,8 @@ And data is here: https://m-selig.ae.illinois.edu/props/volume-1/propDB-volume-1
     Found under "Thin Electric" it is the "10 x 7  [1]" ctrl+f for that exact and you will find it under apc thin electric
 10 x 7 means 10 in diameter and 7 inches pitch
 
-PseudoCode- from UIUC do an analysis of a thin 10 x 5 propeller, 10 means diameter of 10inches
+PseudoCode- from UIUC do an analysis of a thin 10 x 7 propeller, 10 means diameter of 10inches,
+    7 means 7in pitch, ie if screwed through a viscous material how far it would travel
 
 cd("C:/Users/child/Documents/Flow_Lab/Onboarding/BEMProject")
 =#
@@ -122,12 +123,12 @@ CQ = zeros(nJ)      #coef of torque is requried torque over theoretical required
 
 for i = 1:nJ
     local Vinf = J[i] * D * n   #makes a local inflow veloc var at each advance ratio 
-
     local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
+
     outputs = solve.(Ref(rotor), sections, op) #uses all data from above plus local op conditions
-    T, Q = thrusttorque(rotor, sections, outputs)   #calcs T & Q at each sec w/given conditions
+    T, Q = thrusttorque(rotor, sections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     eff[i], CT[i], CQ[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
-    # calcs the coef of each panel under the given conditions
+    # calcs the coef of the blade under the given conditions at each advance ratio
 end
 
 #Prep to compare to experimental data from https://www.apcprop.com/files/PER3_10x7E.dat
@@ -170,9 +171,9 @@ exp = [
 
 #Experimental values
 JExp = exp[:,2]     #Advanced ratio
-CtExp = exp[:, 4]
-CpExp = exp[:, 5]
-EtaExp = exp[:, 3]
+CtExp = exp[:, 4] #Coef of Thrust
+CpExp = exp[:, 5] #Coef of torque 
+EtaExp = exp[:, 3] #efficiency
 
 
 figure()
