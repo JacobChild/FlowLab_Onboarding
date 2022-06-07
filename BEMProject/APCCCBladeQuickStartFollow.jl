@@ -63,7 +63,7 @@ theta = propgeom[:, 3] * pi/180     #the twist angle, converted from degrees to 
 #Airfoil data
 #Airfoil data needs to be imported, ie the lift and drag coef of the airfoil at each location
 #I haven't found the exact data needed, so we are assuming Naca 4412, as their website said it is close to that
-af = AlphaAF("naca4412.dat")   #this gives angle of attack, lift coefficient, drag coefficient
+af = AlphaAF("EpplerE63Data.txt")   #this gives angle of attack, lift coefficient, drag coefficient
 #... the top row has header info, then reynolds number, then mach number, on a dif row each
 
 #Define sections to analyze
@@ -172,13 +172,13 @@ exp = [
 #Experimental values
 JExp = exp[:,2]     #Advanced ratio
 CtExp = exp[:, 4] #Coef of Thrust
-CpExp = exp[:, 5] #Coef of torque 
+CpExp = exp[:, 5] #Coef of power 
 EtaExp = exp[:, 3] #efficiency
 
 
 figure()
 plot(J, CT)
-plot(J, CQ*2*pi)
+plot(J, CQ*2*pi) #converts coef of torque to power
 plot(JExp, CtExp, "ko")
 plot(JExp, CpExp, "ko")
 xlabel(L"J")

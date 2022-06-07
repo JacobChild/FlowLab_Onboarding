@@ -29,7 +29,7 @@ CCBlade Documentation (Viterna function used for extending) - https://flow.byu.e
 =#
 
 #Packages needed for ALL files in Project to run
-using Xfoil, CCBlade, Printf, DataFrames, Plots, FLOWMath, Dierckx
+using Xfoil, CCBlade, Printf, DataFrames, Plots, FLOWMath, Dierckx, DelimitedFiles
 include("PolarPlotter.jl")
 
 #functions
@@ -86,7 +86,7 @@ ExtendedSmoothClPlot = plot!(newalpharads, ExtendedSmoothCl)
 
 #Unit Conversion from radians to degrees, this is optional and could be dangerous as I am not changing the variable name
 alpharads = alpharads*180/pi
-newalpharads = newalpharads*180/pi
+#newalpharads = newalpharads*180/pi
 
 """
 Matrix Meddling
@@ -135,3 +135,19 @@ push!(PlotArray,CombCdpPlot)
 push!(PlotArray,CombCmPlot)
 plot(PlotArray...)
 plot!(size = (1000,900),legend = true)    #changes the plot size 
+
+#Output to a file
+#touch("EpplerE63Data.txt")  #creates the file
+open("EpplerE63Data.txt", "w") do FileID
+lines = ("EppelerE63 Data\n")
+write(FileID, lines)
+lines = ("1000000\n")
+write(FileID, lines)
+lines = ("0\n")
+write(FileID, lines)
+
+#Write table/data to file 
+DataTable = cat(newalpharads, ExtendedSmoothCl, ExtendedSmoothCd, dims = (2,2))
+writedlm(FileID, DataTable)     #uses DelimitedFiles package, I believe default dlm is \t
+
+end
