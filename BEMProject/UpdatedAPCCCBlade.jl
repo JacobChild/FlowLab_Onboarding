@@ -120,6 +120,8 @@ D = 2 * Rtip    #Diameter of the prop is 2* the radius, do I ignore the hub?
 eff = zeros(nJ)     #creates arrays for efficiency, coef of thrust, and coef of torque 
 CT = zeros(nJ)
 CQ = zeros(nJ)      #coef of torque is requried torque over theoretical required torque
+T = zeros(nJ)
+Q = zeros(nJ) #to define them outside of the for loop
 
 #Coef Solver
 
@@ -128,8 +130,8 @@ for i = 1:nJ
     local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
 
     outputs = solve.(Ref(rotor), sections, op) #uses all data from above plus local op conditions
-    T, Q = thrusttorque(rotor, sections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    eff[i], CT[i], CQ[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
+    T[i], Q[i] = thrusttorque(rotor, sections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    eff[i], CT[i], CQ[i] = nondim(T[i], Q[i], Vinf, Omega, rho, rotor, "propeller")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 
@@ -195,33 +197,38 @@ legend(["CCBlade", "experimental"]) =#
 
 default(show=true)
 
-p1 = plot(J, CT, title = "Coefficient of Thrust", label = "Theoretical Ct")
-plot!(JExp, CtExp, m = 4, xlabel = "Advance Ratio (J)", label = "Experimental");
+CTPlot = plot(J, CT, title = "Coefficient of Thrust", label = "Theoretical Ct")
+ExpCTPlot = plot!(JExp, CtExp, m = 4, xlabel = "Advance Ratio (J)", label = "Experimental");
 
 #Error Calculations
 RelError = abs.(CT - CtExp) ./ CtExp * 100
-p3 = plot(J,RelError, title = "Relative Error", xlabel = "Advance Ratio (J)", ylabel = "Percent Relative Error",
+CTErrorPlot = plot(J,RelError, title = "Relative Error", xlabel = "Advance Ratio (J)", ylabel = "Percent Relative Error",
     label = "Error %")
 
-plot(p1,p3)
+#plot(ExpCTPlot,CTErrorPlot)
 
-p1 = plot(J, CQ*2*pi, title = "Coefficient of Power", label = "Theoretical Cp") #CQ*2*pi converts coef of torque to coef of power
-plot!(JExp, CpExp, m = 4, xlabel = "Advance Ratio (J)", label = "Experimental");
+CPPlot = plot(J, CQ*2*pi, title = "Coefficient of Power", label = "Theoretical Cp") #CQ*2*pi converts coef of torque to coef of power
+ExpCPPlot  = plot!(JExp, CpExp, m = 4, xlabel = "Advance Ratio (J)", label = "Experimental");
 
 #Error Calculations
 RelError = (CQ*2*pi - CpExp) ./ CpExp * 100
-p3 = plot(J,RelError, title = "Relative Error", xlabel = "Advance Ratio (J)", 
+CPErrorPlot = plot(J,RelError, title = "Relative Error", xlabel = "Advance Ratio (J)", 
 ylabel = "Percent Relative Error", label = "Error %")
 
-plot(p1,p3)
+#plot(ExpCPPlot, CPErrorPlot)
 
-p1 = plot(J[1:29], eff[1:29], title = "Effeciency", label = "Theoretical Eta")
-p2 = plot!(JExp[1:29], EtaExp[1:29], m = 4, xlabel = "Advance Ratio (J)", ylabel = "Effeciency (eta)",
+EffPlot = plot(J[1:29], eff[1:29], title = "Effeciency", label = "Theoretical Eta")
+ExpEffPlot = plot!(JExp[1:29], EtaExp[1:29], m = 4, xlabel = "Advance Ratio (J)", ylabel = "Effeciency (eta)",
     label = "Experimental", legend = :topleft);
 
 #Error Calculations
 RelError = (eff[1:29] - EtaExp[1:29]) ./ EtaExp[1:29] * 100
-p3 = plot(J[1:29],RelError, title = "Relative Error", xlabel = "Advance Ratio (J)", 
+EffErrorPlot = plot(J[1:29],RelError, title = "Relative Error", xlabel = "Advance Ratio (J)", 
 ylabel = "Percent Relative Error", label = "Error %")
 
-plot(p1,p3)
+#plot(ExpEffPlot,EffErrorPlot)
+
+#Torque and Thrust plots
+TPlot = plot(J, T, label = "Thrust (T)")
+QPlot = plot(J, Q, label = "Torque(Q)")
+plot(TPlot, QPlot, ExpCTPlot, ExpCPPlot, ExpEffPlot, legend = false)
