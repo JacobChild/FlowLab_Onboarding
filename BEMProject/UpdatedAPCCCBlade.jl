@@ -27,7 +27,7 @@ Rhub = .8/2 * .0254     #The hub radiaus is diameter/2 and can be found on the w
 B = 2   #Number of blades
 RPM = 5000.0  #The quick start guide uses 5400, but experimental data is only in 1000s on the website 
 
-rotor = Rotor(Rhub, Rtip, B) #calls Rotor from the CCBlade package and stores a "Rotor" object?
+rotor = Rotor(Rhub, Rtip, B) #calls Rotor from the CCBlade package and stores a "Rotor" object
 #fieldnames(typeof(rotor))
 
 #Define the Prop geometry
@@ -61,8 +61,7 @@ theta = propgeom[:, 3] * pi/180     #the twist angle, converted from degrees to 
 
 
 #Airfoil data
-#Airfoil data needs to be imported, ie the lift and drag coef of the airfoil at each location
-#I haven't found the exact data needed, so we are assuming Naca 4412, as their website said it is close to that
+#Airfoil data needs to be imported, ie the lift and drag coef of the airfoil at different angles of attack (-pi to pi)
 af = AlphaAF("EpplerE63Data.txt")   #this gives angle of attack, lift coefficient, drag coefficient
 #... the top row has header info, then reynolds number, then mach number, on a dif row each
 
@@ -115,11 +114,13 @@ nJ = 30     #number of advance ratios to evaluate
 J = range(.00001, .92, length = nJ) #creates a range of advance ratios from .001 to .92 (exp ending), what are normal vals?
 Omega = RPM*pi/30  #rpms to rad/sec 
 n = Omega/(2*pi)    # converts radians persecond to just rotations per second, same as rpm/60
-D = 2 * Rtip    #Diameter of the prop is 2* the radius, do I ignore the hub?
+D = 2 * Rtip    #Diameter of the prop is 2* the radius (note: Rtip is defined from center of rotation so includes Rhub)
 
+#The following values must be defined outside of the for loop or the cannot be used outside of ...
+#... the for loop (scoping)
 eff = zeros(nJ)     #creates arrays for efficiency, coef of thrust, and coef of torque 
-CT = zeros(nJ)
-CQ = zeros(nJ)      #coef of torque is requried torque over theoretical required torque
+CT = zeros(nJ)  #Coef of Thrust 
+CQ = zeros(nJ)      #coef of torque
 T = zeros(nJ)
 Q = zeros(nJ) #to define them outside of the for loop
 
@@ -171,7 +172,7 @@ exp = [
    42.0        0.89      0.5648      0.0068      0.0107       0.011       0.136       0.054              
    43.5        0.92      0.0024      0.0000      0.0047       0.005       0.059       0.000 
 ] 
-#Above is the experimental data, I assume at each radial location 
+#Above is the experimental data, I assume at a series of advance ratios 
 
 #Experimental values
 JExp = exp[:,2]     #Advanced ratio
@@ -229,6 +230,6 @@ ylabel = "Percent Relative Error", label = "Error %")
 #plot(ExpEffPlot,EffErrorPlot)
 
 #Torque and Thrust plots
-TPlot = plot(J, T, label = "Thrust (T)")
-QPlot = plot(J, Q, label = "Torque(Q)")
+TPlot = plot(J, T, label = "Thrust (T)", title = "Straight Thrust")
+QPlot = plot(J, Q, label = "Torque(Q)", title = "Straight Torque (Q)")
 plot(TPlot, QPlot, ExpCTPlot, ExpCPPlot, ExpEffPlot, legend = false)
