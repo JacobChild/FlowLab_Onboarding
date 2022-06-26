@@ -233,3 +233,11 @@ ylabel = "Percent Relative Error", label = "Error %")
 TPlot = plot(J, T, label = "Thrust (T)", title = "Straight Thrust")
 QPlot = plot(J, Q, label = "Torque(Q)", title = "Straight Torque (Q)")
 plot(TPlot, QPlot, ExpCTPlot, ExpCPPlot, ExpEffPlot, legend = false)
+
+surface(J, CQ*2*pi, CT)
+#scatter(J, CQ*2*pi, CT, xlabel = "Advance Ratio", ylabel = "Coef of Power", zlabel = "Coef of Thrust")
+#scatter!(J, CQ*2*pi, eff)
+
+default(show=true)
+plot(J, CQ*2*pi, CT, xlabel = "Advance Ratio", ylabel = "Coef of Power", zlabel = "Coef of Thrust / Eff", label = "Coef of Thrust")
+plot!(J, CQ*2*pi, eff, label = "Effeciency (eta)", camera = (45,90))
