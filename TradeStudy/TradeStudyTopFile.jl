@@ -47,6 +47,7 @@ AeroFiles = AirfoilFiles["Aero file"]   #These files have the xfoil output etc, 
 ContourX = [Vector{Float64}(undef,(0)) for _ in 1:length(ContourFiles)] #Initialize the array of vectors
 ContourY = [Vector{Float64}(undef,(0)) for _ in 1:length(ContourFiles)] #Initialize the array of vectors
 
+#For loop that extracts the x and y coordinates from each of the ContourFiles
 for i = 1:NumofLocations
     println(ContourFiles[i])
     GeomFileName = ContourFiles[i]
@@ -54,3 +55,4 @@ for i = 1:NumofLocations
     ContourX[i] = GeomFiles["x/c"]
     ContourY[i] = GeomFiles["y/c"]
 end
+
