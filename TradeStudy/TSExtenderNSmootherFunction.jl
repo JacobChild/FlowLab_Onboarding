@@ -99,7 +99,8 @@ push!(PlotArray,FullClPlot)
 push!(PlotArray,FullCdPlot)
 push!(PlotArray,CombCdpPlot)
 push!(PlotArray,CombCmPlot)
-#plot(PlotArray...)
+plot(PlotArray...)
+display(FullClPlot)
 #plot!(size = (1000,900),legend = true)    #changes the plot size 
 
 #Output to a file

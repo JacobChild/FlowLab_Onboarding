@@ -35,11 +35,14 @@ function TSPolarPlotterFunction(x, y, Re, mach, ncrit, alpha)
     Converged = zeros(Bool, n)
     
     #Calculations 
+    #=
     for i = 1:n
-        Cl[i], Cd[i], Cdp[i], Cm[i], Converged[i] = Xfoil.solve_alpha(alpha[i], Re; mach, iter = 500, ncrit)
+        Cl[i], Cd[i], Cdp[i], Cm[i], Converged[i] = Xfoil.solve_alpha(alpha[i], Re; mach, iter = 100, ncrit, percussive_maintenance=true)
         #The above calculates the coefficients at each angle (i of alpha)
         #for some reason it isn't converging on the last one?
     end
+    =#
+    Cl, Cd, Cdp, Cm, Converged = Xfoil.alpha_sweep(x, y, alpha, Re; mach, iter = 100, ncrit, percussive_maintenance=false)
     @show Converged
     #Present Data TURNED OFF FOR FUNCTION 
      DataFrame()

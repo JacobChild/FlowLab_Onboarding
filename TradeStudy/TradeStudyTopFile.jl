@@ -83,7 +83,7 @@ rho = 1.225 #kg/m^3
 Re = 50000 #Reynolds number
 M = 0.0     #Mach number
 Ncrit = 9   #the "smoothness of the air"
-alfa = -1.0:.5:10.0 #This is the angle of attack in degrees, any benefit to a larger range?
+alfa = -12.0:.1:43.0 #This is the angle of attack in degrees, any benefit to a larger range?
 Vinf = 5.0  #inflow velocity, this means that the solve done below is for a singular advance ratio
 RPM = 5000
 Omega = RPM*pi/30  #converts rpm to rad/s, derivation: rpm*pi*360deg/(60sec*180deg)-> rpm*pi/30
@@ -95,14 +95,16 @@ include("TSExtenderNSmootherFunction.jl")
 
 #For loop to create the airfoil data and sections
 aftypes = Array{AlphaAF}(undef, NumofSections) #Initialize the array of alphaAF objects
-
+#DebugPlot = plot()
 for i in 1:NumofSections
     alphadegs, Cl, Cd, Cdp, Cm = TSPolarPlotterFunction(ContourX[i], ContourY[i], Re, M, Ncrit, alfa)
     alpharads = alphadegs * pi/180
     OldPlotArray, newalphadegs, ExtendedSmoothCl, ExtendedSmoothCd = TSExtenderNSmootherFunction(alpharads, Cl, Cd, Cdp, Cm, cr75)
+    #plot!(OldPlotArray)
+    break
     aftypes[i] = AlphaAF("CurrentAirfoilData.txt");   #this gives angle of attack, lift coefficient, drag coefficient
 end
-
+#display(DebugPlot)
 
 #For loop to put which airfoil is used for each section into the af_idx array
 af_idx = zero(r)
