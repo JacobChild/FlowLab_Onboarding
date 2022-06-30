@@ -24,7 +24,7 @@ Dierckx Documentation (for smoothing) - https://www.juliapackages.com/p/dierckx
 CCBlade Documentation (Viterna function used for extending) - https://flow.byu.edu/CCBlade.jl/stable/reference/
 
 =#
-function TSExtenderNSmootherFunction(alpharads, Cl, Cd, Cdp, Cm, cr75)
+function TSExtenderNSmootherFunction(alpharads, Cl, Cd, Cdp, Cm, cr75, Re, M)
 #functions
 function smoother(Coef,alpharads, amount)
     #From the Dierckx package, creates a 1-D spline to the kth order with an "s" smoothing amount.
@@ -76,7 +76,6 @@ CombCdp = cat(Cdp, SmoothCdp, dims = (2,2))
 #As above, but Cm
 CombCm = cat(Cm, SmoothCm, dims = (2,2))
 
-
 """
 Plot Palooza
 Saves the various plots as plot objects and combines all plot objects of a coefficient into one plot object
@@ -99,8 +98,8 @@ push!(PlotArray,FullClPlot)
 push!(PlotArray,FullCdPlot)
 push!(PlotArray,CombCdpPlot)
 push!(PlotArray,CombCmPlot)
-plot(PlotArray...)
-display(FullClPlot)
+#plot(PlotArray...)
+#display(FullClPlot)
 #plot!(size = (1000,900),legend = true)    #changes the plot size 
 
 #Output to a file
