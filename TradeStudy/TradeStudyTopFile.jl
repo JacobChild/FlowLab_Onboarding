@@ -18,84 +18,61 @@ TODO for to-dos
 =#
 
 #Needed packages for the whole project, and function file 
-using CSV, Xfoil, CCBlade, Printf, DataFrames, Plots, FLOWMath, Dierckx, DelimitedFiles, Plots.Plots.Measures
+using Xfoil, CCBlade, DataFrames, Plots, FLOWMath, Dierckx, DelimitedFiles, Plots.Plots.Measures
 #Plotting Settings
-dims = (1,2)
-pad = 16mm
-pyplot()
+dims = (1,2) #for plot layouts after each parameter that was varied, ie "subplot" layouts
+pad = 16mm #padding/margin for the plots
+pyplot() #plot package that is being used so the plots come up as seperate figures in the VSCode plot navigator pane 
 
-Plots.default(reuse = false)
-#include("TSExtenderNSmootherFunction.jl")
+Plots.default(reuse = false) #means that each figure (in pyplot) doesn't overwrite the one before it
 
-#Open and import csv file
+
 #Import the high level csv file
-#TODO Redo all of the imports with just the DelimitedFiles package as CSV is complicated/extra 
 CmdFileName = "DJI-II.csv"
-cmdfile = CSV.File("data\\rotors\\$CmdFileName",delim = ",") #TODO delete if all works
-cmdfile = readdlm("data\\rotors\\$CmdFileName", ",")
-Rtip = parse(Float64, cmdfile.file[1])#TODO delete if all works
-println("csv Rtip $Rtip")#TODO delete if all works
-Rtip = parse(Float64,cmdfile[2,2])
-println("readdlm Rtip $Rtip")#TODO delete if all works
+cmdfile = readdlm("data\\rotors\\$CmdFileName", ',')
+Rtip = cmdfile[2,2]
 #Rhub = 0.004938276 #This is the first r value in the DJI-II prop, there is an interference, but that is fixed below
-Rhub = parse(Float64, cmdfile.file[2])#TODO delete if all works
-Rhub = parse(Float64,cmdfile[3,2])
-NumofBlades = parse(Float64, cmdfile.file[3])#TODO delete if all works
-NumofBlades = parse(Float64,cmdfile[4,2])
-BladeFileName = cmdfile.file[4]#TODO delete if all works
+Rhub = cmdfile[3,2]
+NumofBlades = cmdfile[4,2]
 BladeFileName = cmdfile[5,2]
 
 #Define the rotor object
 rotor = Rotor(Rhub, Rtip, NumofBlades) #stores a "Rotor" object
 
 #Import the blade directory file
-BladeFile = CSV.File("data\\rotors\\$BladeFileName",delim = ",")#TODO delete if all works
-BladeFile = readdlm("data\\rotors\\$BladeFileName", ",")
-ChordFile = BladeFile.file[1]#TODO delete if all works
+BladeFile = readdlm("data\\rotors\\$BladeFileName", ',')
+
 ChordFile = BladeFile[2,2]
-PitchFile = BladeFile.file[2]#TODO delete if all works
 PitchFile = BladeFile[3,2]
-SweepFile = BladeFile.file[3]#TODO delete if all works
 SweepFile = BladeFile[4,2]
-HeightFile = BladeFile.file[4]#TODO delete if all works
+
 HeightFile = BladeFile[5,2]
-AirfoilFiles = BladeFile.file[5]#TODO delete if all works
 AirfoilFiles = BladeFile[6,2]
-SplineOrder = parse(Int64, BladeFile.file[6])#TODO delete if all works
-SplineOrder = parse(Int64,BladeFile[7,2]) #?Is that what was used to smooth the data, or what I should use to smooth the data?
-SplineSmoothing = parse(Float64, BladeFile.file[7])#TODO delete if all works
-SplineSmoothing = parse(Float64,BladeFile[8,2]) #? Is that was was used to smooth the data, or what I should use to smooth the data?
+SplineOrder = BladeFile[7,2] #?Is that what was used to smooth the data, or what I should use to smooth the data?
+SplineSmoothing = BladeFile[8,2] #? Is that was was used to smooth the data, or what I should use to smooth the data?
 
 #Import the ChordFile 
-ChordDist = CSV.File("data\\rotors\\$ChordFile",delim = ",")#TODO delete if all works
-ChordDist = readdlm("data\\rotors\\$ChordFile", ",")
-r = ChordDist["r/R"] * Rtip#TODO delete if all works
+ChordDist = readdlm("data\\rotors\\$ChordFile", ',')
 r = ChordDist[2:end,1] .* Rtip 
-chord = ChordDist["c/R"] * Rtip#TODO delete if all works
 chord = ChordDist[2:end,2] .* Rtip
 
 #Check if the Geometry is okay
 #! if the first value of r < Rhub it will throw the acos bounds error
 if r[1] < Rhub
-    RHub = r[1]
+    Rhub = r[1]
     rotor = Rotor(Rhub, Rtip, NumofBlades) #redefines and stores the "Rotor" object
+    println("RHub was redefined to: $Rhub, and the rotor object was redefined")
 end
 
 #Import the PitchFile
-PitchDist = CSV.File("data\\rotors\\$PitchFile",delim = ",")#TODO delete if all works
-PitchDist = readdlm("data\\rotors\\$PitchFile", ",")
-twist = PitchDist["twist (deg)"] * pi/180 #TODO delete if all works
+PitchDist = readdlm("data\\rotors\\$PitchFile", ',')
 twist = PitchDist[2:end,2] .* pi/180    #import twist and convert to radians
 
 #Import the AirfoilFiles 
-AirfoilFiles = CSV.File("data\\rotors\\$AirfoilFiles",delim = ",")#TODO delete if all works
-AirfoilFiles = readdlm("data\\rotors\\$AirfoilFiles", ",")
-Locations = AirfoilFiles["r/R"]*Rtip#TODO delete if all works
+AirfoilFiles = readdlm("data\\rotors\\$AirfoilFiles", ',')
 Locations = AirfoilFiles[2:end,1] .* Rtip
 NumofSections = length(Locations)
-ContourFiles = AirfoilFiles["Contour file"]#TODO delete if all works
 ContourFiles = AirfoilFiles[2:end,2] #These are the files that contain the airfoil coordinates
-AeroFiles = AirfoilFiles["Aero file"] #TODO delete if all works
 AeroFiles = AirfoilFiles[2:end,3]  #These files have the xfoil output etc, but aren't extrapolated
 #AeroFiles may not exist depending on the csv file and whether or not the data was previously calculated
 #If above is the case, check airfoiltools.com, or generate your own data with ExtenderNSmoother.jl 
@@ -108,11 +85,8 @@ ContourY = [Vector{Float64}(undef,(0)) for _ in 1:length(ContourFiles)] #Initial
 #For loop that extracts the x and y coordinates from each of the ContourFiles
 for i = 1:NumofSections
     GeomFileName = ContourFiles[i]
-    GeomFiles = CSV.File("data\\airfoils\\$GeomFileName",delim = ",")#TODO delete if all works
-    GeomFiles = readdlm("data\\airfoils\\$GeomFileName", ",")
-    ContourX[i] = GeomFiles["x/c"]#TODO delete if all works
+    GeomFiles = readdlm("data\\airfoils\\$GeomFileName", ',')
     ContourX[i] = GeomFiles[2:end,1]
-    ContourY[i] = GeomFiles["y/c"]#TODO delete if all works
     ContourY[i] = GeomFiles[2:end,2]
 end
 
@@ -294,8 +268,8 @@ CQJVar = zeros(NumofAdvanceRatios) #Initialize the CQ array
 for i = 1:NumofAdvanceRatios
     local Vinf = VarAdvanceRatio[i] * D * n   #makes a local inflow veloc var at each advance ratio 
     local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
-    outputs = solve.(Ref(rotor), sections, op) #uses all data from above plus local op conditions
-    T, Q = thrusttorque(rotor, sections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    outputs = solve.(Ref(rotor), Normalsections, op) #uses all data from above plus local op conditions
+    T, Q = thrusttorque(rotor, Normalsections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     EffJVar[i], CTJVar[i], CQJVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
