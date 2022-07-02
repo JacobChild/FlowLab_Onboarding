@@ -21,51 +21,85 @@ TODO for to-dos
 using CSV, Xfoil, CCBlade, Printf, DataFrames, Plots, FLOWMath, Dierckx, DelimitedFiles, Plots.Plots.Measures
 #Plotting Settings
 dims = (1,2)
-#pyplot()
-#Plots.default(reuse = false)
+pad = 16mm
+pyplot()
+
+Plots.default(reuse = false)
 #include("TSExtenderNSmootherFunction.jl")
 
 #Open and import csv file
 #Import the high level csv file
 #TODO Redo all of the imports with just the DelimitedFiles package as CSV is complicated/extra 
 CmdFileName = "DJI-II.csv"
-cmdfile = CSV.File("data\\rotors\\$CmdFileName",delim = ",")
-Rtip = parse(Float64, cmdfile.file[1])
-Rhub = 0.004938276 #TODO: This is the first r value, so I might need to move this and make an if statement to change Rhub if they interfere
-#Rhub = parse(Float64, cmdfile.file[2])
-NumofBlades = parse(Float64, cmdfile.file[3])
-BladeFileName = cmdfile.file[4]
+cmdfile = CSV.File("data\\rotors\\$CmdFileName",delim = ",") #TODO delete if all works
+cmdfile = readdlm("data\\rotors\\$CmdFileName", ",")
+Rtip = parse(Float64, cmdfile.file[1])#TODO delete if all works
+println("csv Rtip $Rtip")#TODO delete if all works
+Rtip = parse(Float64,cmdfile[2,2])
+println("readdlm Rtip $Rtip")#TODO delete if all works
+#Rhub = 0.004938276 #This is the first r value in the DJI-II prop, there is an interference, but that is fixed below
+Rhub = parse(Float64, cmdfile.file[2])#TODO delete if all works
+Rhub = parse(Float64,cmdfile[3,2])
+NumofBlades = parse(Float64, cmdfile.file[3])#TODO delete if all works
+NumofBlades = parse(Float64,cmdfile[4,2])
+BladeFileName = cmdfile.file[4]#TODO delete if all works
+BladeFileName = cmdfile[5,2]
 
 #Define the rotor object
 rotor = Rotor(Rhub, Rtip, NumofBlades) #stores a "Rotor" object
 
 #Import the blade directory file
-BladeFile = CSV.File("data\\rotors\\$BladeFileName",delim = ",")
-ChordFile = BladeFile.file[1]
-PitchFile = BladeFile.file[2]
-SweepFile = BladeFile.file[3]
-HeightFile = BladeFile.file[4]
-AirfoilFiles = BladeFile.file[5]
-SplineOrder = parse(Int64, BladeFile.file[6])
-SplineSmoothing = parse(Float64, BladeFile.file[7])
+BladeFile = CSV.File("data\\rotors\\$BladeFileName",delim = ",")#TODO delete if all works
+BladeFile = readdlm("data\\rotors\\$BladeFileName", ",")
+ChordFile = BladeFile.file[1]#TODO delete if all works
+ChordFile = BladeFile[2,2]
+PitchFile = BladeFile.file[2]#TODO delete if all works
+PitchFile = BladeFile[3,2]
+SweepFile = BladeFile.file[3]#TODO delete if all works
+SweepFile = BladeFile[4,2]
+HeightFile = BladeFile.file[4]#TODO delete if all works
+HeightFile = BladeFile[5,2]
+AirfoilFiles = BladeFile.file[5]#TODO delete if all works
+AirfoilFiles = BladeFile[6,2]
+SplineOrder = parse(Int64, BladeFile.file[6])#TODO delete if all works
+SplineOrder = parse(Int64,BladeFile[7,2]) #?Is that what was used to smooth the data, or what I should use to smooth the data?
+SplineSmoothing = parse(Float64, BladeFile.file[7])#TODO delete if all works
+SplineSmoothing = parse(Float64,BladeFile[8,2]) #? Is that was was used to smooth the data, or what I should use to smooth the data?
 
 #Import the ChordFile 
-ChordDist = CSV.File("data\\rotors\\$ChordFile",delim = ",")
-r = ChordDist["r/R"] * Rtip
-chord = ChordDist["c/R"] * Rtip
+ChordDist = CSV.File("data\\rotors\\$ChordFile",delim = ",")#TODO delete if all works
+ChordDist = readdlm("data\\rotors\\$ChordFile", ",")
+r = ChordDist["r/R"] * Rtip#TODO delete if all works
+r = ChordDist[2:end,1] .* Rtip 
+chord = ChordDist["c/R"] * Rtip#TODO delete if all works
+chord = ChordDist[2:end,2] .* Rtip
+
+#Check if the Geometry is okay
+#! if the first value of r < Rhub it will throw the acos bounds error
+if r[1] < Rhub
+    RHub = r[1]
+    rotor = Rotor(Rhub, Rtip, NumofBlades) #redefines and stores the "Rotor" object
+end
 
 #Import the PitchFile
-PitchDist = CSV.File("data\\rotors\\$PitchFile",delim = ",")
-twist = PitchDist["twist (deg)"] * pi/180 #import twist and convert to radians
+PitchDist = CSV.File("data\\rotors\\$PitchFile",delim = ",")#TODO delete if all works
+PitchDist = readdlm("data\\rotors\\$PitchFile", ",")
+twist = PitchDist["twist (deg)"] * pi/180 #TODO delete if all works
+twist = PitchDist[2:end,2] .* pi/180    #import twist and convert to radians
 
 #Import the AirfoilFiles 
-AirfoilFiles = CSV.File("data\\rotors\\$AirfoilFiles",delim = ",")
-Locations = AirfoilFiles["r/R"]*Rtip
+AirfoilFiles = CSV.File("data\\rotors\\$AirfoilFiles",delim = ",")#TODO delete if all works
+AirfoilFiles = readdlm("data\\rotors\\$AirfoilFiles", ",")
+Locations = AirfoilFiles["r/R"]*Rtip#TODO delete if all works
+Locations = AirfoilFiles[2:end,1] .* Rtip
 NumofSections = length(Locations)
-ContourFiles = AirfoilFiles["Contour file"] #These are the files that contain the airfoil coordinates
-AeroFiles = AirfoilFiles["Aero file"]   #These files have the xfoil output etc, but aren't extrapolated
+ContourFiles = AirfoilFiles["Contour file"]#TODO delete if all works
+ContourFiles = AirfoilFiles[2:end,2] #These are the files that contain the airfoil coordinates
+AeroFiles = AirfoilFiles["Aero file"] #TODO delete if all works
+AeroFiles = AirfoilFiles[2:end,3]  #These files have the xfoil output etc, but aren't extrapolated
 #AeroFiles may not exist depending on the csv file and whether or not the data was previously calculated
-#I will ignore the AeroFiles data in favor of more robust code that will generate my own
+#If above is the case, check airfoiltools.com, or generate your own data with ExtenderNSmoother.jl 
+#     #found in the XfoilProject folder 
 
 #Import the ContourFiles
 ContourX = [Vector{Float64}(undef,(0)) for _ in 1:length(ContourFiles)] #Initialize the array of vectors
@@ -74,9 +108,12 @@ ContourY = [Vector{Float64}(undef,(0)) for _ in 1:length(ContourFiles)] #Initial
 #For loop that extracts the x and y coordinates from each of the ContourFiles
 for i = 1:NumofSections
     GeomFileName = ContourFiles[i]
-    GeomFiles = CSV.File("data\\airfoils\\$GeomFileName",delim = ",")
-    ContourX[i] = GeomFiles["x/c"]
-    ContourY[i] = GeomFiles["y/c"]
+    GeomFiles = CSV.File("data\\airfoils\\$GeomFileName",delim = ",")#TODO delete if all works
+    GeomFiles = readdlm("data\\airfoils\\$GeomFileName", ",")
+    ContourX[i] = GeomFiles["x/c"]#TODO delete if all works
+    ContourX[i] = GeomFiles[2:end,1]
+    ContourY[i] = GeomFiles["y/c"]#TODO delete if all works
+    ContourY[i] = GeomFiles[2:end,2]
 end
 
 #Define the fluid conditions and other values for functions
@@ -92,17 +129,13 @@ RPM = 5000
 Omega = RPM*pi/30  #converts rpm to rad/s, derivation: rpm*pi*360deg/(60sec*180deg)-> rpm*pi/30
 
 
-#CIncludes needed files for the functions
+#Includes needed files for the functions
 include("TSPolarPlotterFunction.jl") 
 include("TSExtenderNSmootherFunction.jl")
-
-#For loop to create the airfoil data and sections
+#Prep for Loop
 aftypes = Array{AlphaAF}(undef, NumofSections) #Initialize the array of alphaAF objects
-#DebugPlot = plot() #! This plot doesn't work
-#TODO redo the for loop so it extracts and then uses data from the aerofiles
 
 #For Loop that extracts and uses the data from the aerofiles to create the airfoil objects
-
 for i in 1:NumofSections
     CurrentData = readdlm("data\\airfoils\\$(AeroFiles[i])", ',')
     CurrentHeaderData = CurrentData[1:9,:]
@@ -117,13 +150,15 @@ for i in 1:NumofSections
     Cdp = CurrentAeroData[:,4]
     Cm = CurrentAeroData[:,5]
     OldPlotArray, newalphadegs, ExtendedSmoothCl, ExtendedSmoothCd = TSExtenderNSmootherFunction(alpharads, Cl, Cd, Cdp, Cm, cr75, Re, M)
-    #plot!(OldPlotArray)
     aftypes[i] = AlphaAF("CurrentAirfoilData.txt");   #this gives angle of attack, lift coefficient, drag coefficient
 end
-#display(DebugPlot)
+
 
 #For loop to put which airfoil is used for each section into the af_idx array
 af_idx = zero(r) #? Why does zero(r) seem to work in this case, but EffRVar = zero(NumofRadiis) doesn't work
+#? Ans: Its because zero is based off of length and makes an array, so one input = one zero, unless that 
+#?     input is a vector, then it makes that many zeros, it can also take in array dimensions ie zero([3,2])
+#?     zeros is specifically to create vectors of a certain length and type, and cannot do arrays (that I know of)
 
 for k = 1:NumofSections
 	for i = 1:length(r) 
@@ -144,15 +179,12 @@ end
 af_idx = Int.(af_idx)   #Converts the index values to Ints
 airfoils = aftypes[af_idx]  #This is the array of airfoil objects that correspond to the airfoil index values
 
+# Outputs before varying anything, ie "Normal"
+Normalsections = Section.(r, chord, twist, airfoils)    #This is the reference with everything unchanged
+Normalop = simple_op.(Vinf, Omega, r, rho) #The Normal operating points
+Normalout = solve.(Ref(rotor), Normalsections, Normalop)  #outputs a struct of results for each section/radial location
 
-
-#Vary the Variables- r, chord, twist 
-sections = Section.(r, chord, twist, airfoils)    #This is the reference with everything unchanged
-op = simple_op.(Vinf, Omega, r, rho) #The Normal operating points
-#TODO Fix this from throwing an error, it does so in the next one, so I assume it won't work in all of them
-#! There is an error in this section somewhere, nothing is being plotted!
-Normalout = solve.(Ref(rotor), sections, op)  #outputs a struct of results for each section/radial location
-
+#Vary the Variables- Rtip, chord, twist
 ```
 Vary the radius- Note, r is a function of Rtip, so first take that out before redefining r
 ```
@@ -164,13 +196,14 @@ chordrvar = chord/Rtip #making the chord a function of NewRtip so Rtip can be va
 EffRVar = zeros(NumofRadiis) #Initialize the efficiency array
 CTRVar = zeros(NumofRadiis) #Initialize the CT array
 CQRVar = zeros(NumofRadiis) #Initialize the CQ array
-NewRTip = zeros(length(rvar))
 
 #Calculate and output
 for i = 1:NumofRadiis
-    #! rotor is defined by Rhub and Rtip, so I need to update those each loop. 
-    #! if the first value of r < Rhub it will throw the acos bounds error
-    NewRHub = rvar[1].*NewRTip[i] #This is the new hub radius
+    if rvar[1].*NewRTip[i] < Rhub
+        NewRHub = rvar[1].*NewRTip[i] #This is the new hub radius
+    else
+        NewRHub = Rhub
+    end
     RVarRotor = Rotor(NewRHub, NewRTip[i], NumofBlades) #This is the new rotor object
     sections = Section.(rvar.*NewRTip[i], chordrvar.*NewRTip[i], twist, airfoils)
     op = simple_op.(Vinf, Omega, rvar.*NewRTip[i], rho) 
@@ -179,9 +212,11 @@ for i = 1:NumofRadiis
     EffRVar[i], CTRVar[i], CQRVar[i] = nondim(T, Q, Vinf, Omega, rho, RVarRotor, "propeller")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
-RVarCoefPlot = plot(NewRTip, CTRVar, title = "Varying Blade Radius", label = "Coefficient of Thrust", legend = :topleft)
-plot!(twinx(), NewRTip, CQRVar, label = "Coefficient of Torque", legend = :topright)
-RVarEffPlot = plot(NewRTip, EffRVar, label = "Efficiency", legend = :topright)
+#Plotting
+RVarCoefPlot = plot(NewRTip, CQRVar, title = "Varying Blade Radius", label = "Coefficient of Torque", legend = :topleft, margin = pad, box = :on,)
+plot!(NewRTip, CQRVar.*2 .*pi, label = "Coefficient of Power", linecolor = :orange, ylabel = "Coef of Torque and Power",xlabel = "Radius (m)")
+plot!(twinx(), NewRTip, CTRVar, label = "Coefficient of Thrust", legend = (.6, .7), linecolor = :green, ylabel = "Coef of Thrust")
+RVarEffPlot = plot(NewRTip, EffRVar, label = "Efficiency", legend = :topright, margin = pad, title = "Varying Blade Radius", xlabel = "Radius (m)")
 RVarPlot = plot(RVarCoefPlot, RVarEffPlot, layout = dims)
 
 
@@ -207,9 +242,10 @@ for i = 1:NumofChords
     EffCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
-CVarCoefPlot = plot(VarChordPercent, CTCVar, title = "Varying Blade Chord", label = "Coefficient of Thrust", legend = :topleft)
-plot!(twinx(), VarChordPercent, CQCVar, label = "Coefficient of Torque", legend = :topright)
-CVarEffPlot = plot(VarChordPercent, EffCVar, label = "Efficiency", legend = :topright)
+#Plotting
+CVarCoefPlot = plot(VarChordPercent, CTCVar, title = "Varying Blade Chord", label = "Coefficient of Thrust", legend = :topleft,xlabel = "Values used to vary Chord (in % of RTip)", margin = pad, ylabel = "Coef of Thrust")
+plot!(twinx(), VarChordPercent, CQCVar, label = "Coefficient of Torque", legend = (.56, .44),linecolor = :orange, ylabel = "Coef of Torque")
+CVarEffPlot = plot(VarChordPercent, EffCVar, label = "Efficiency", legend = :topright, margin = pad, title = "Varying Blade Chord",xlabel = "Values used to vary Chord (in % of RTip)")
 CVarPlot = plot(CVarCoefPlot, CVarEffPlot, layout = dims)
 
 
@@ -220,7 +256,7 @@ Vary the Pitch- Because we are varying this independently of Rtip we dont need t
 ``` 
 #Input Prep
 NumofPitches = 20 #Number of pitches to vary
-VarPitch = range(-45, 45, length = NumofPitches) #Ranging from pitching down to pitching up
+VarPitch = range(-25, 25, length = NumofPitches) #Ranging from pitching down to pitching up
 EffPVar = zeros(NumofPitches) #Initialize the efficiency array
 CTPVar = zeros(NumofPitches) #Initialize the CT array
 CQPVar = zeros(NumofPitches) #Initialize the CQ array
@@ -228,17 +264,19 @@ PVarSections = Section.(r, chord, twist, airfoils) #Defining the sections to use
 
 #Calculate and output
 for i = 1:NumofPitches
-    pitch = VarPitch[i] #This is the pitch angle to use
+    pitch = VarPitch[i]*pi/180 #This is the pitch angle to use
     op = simple_op.(Vinf, Omega, r, rho; pitch)
     out = solve.(Ref(rotor), PVarSections, op)
     T, Q = thrusttorque(rotor, PVarSections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     EffPVar[i], CTPVar[i], CQPVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
-PVarCoefPlot = plot(VarPitch, CTPVar, title = "Varying Blade Pitch", label = "Coefficient of Thrust", legend = :topleft)
-plot!(twinx(), VarPitch, CQPVar, label = "Coefficient of Torque", legend = :topright)
-PVarEffPlot = plot(VarPitch, EffPVar, label = "Efficiency", legend = :topright)
-PVarPlot = plot(PVarCoefPlot, PVarEffPlot, layout = dims)
+#Plotting
+PVarCoefPlot = plot(VarPitch, CTPVar, title = "Varying Blade Pitch", label = "Coefficient of Thrust", legend = :topleft, xlabel = "Pitch added or subtracted from current value (deg)", margin = pad, ylabel = "Coef of Thrust")
+plot!(twinx(), VarPitch, CQPVar, label = "Coefficient of Torque", legend = (.6,.4), linecolor = :orange, ylabel = "Coef of Torque")
+PVarEffPlot = plot(VarPitch, EffPVar, label = "Efficiency", legend = :topright, title = "Varying Blade Pitch", margin = pad, xlabel = "Pitch added or subtracted from current value (deg)")
+PVarPlot = plot(PVarCoefPlot, PVarEffPlot, layout = dims, xlabel = "Pitch added or subtracted from current value (deg)")
+
 
 ```
 Vary the advance ratios- This is just like in the BEM Project, see BEM Project folder and Jupyter NB
@@ -256,22 +294,43 @@ CQJVar = zeros(NumofAdvanceRatios) #Initialize the CQ array
 for i = 1:NumofAdvanceRatios
     local Vinf = VarAdvanceRatio[i] * D * n   #makes a local inflow veloc var at each advance ratio 
     local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
-    
     outputs = solve.(Ref(rotor), sections, op) #uses all data from above plus local op conditions
     T, Q = thrusttorque(rotor, sections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     EffJVar[i], CTJVar[i], CQJVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
-JVarCoefPlot = plot(VarAdvanceRatio, CTJVar, title = "Varying Advance Ratio", label = "Coefficient of Thrust", legend = :topleft)
-plot!(twinx(), VarAdvanceRatio, CQJVar, label = "Coefficient of Torque", legend = :topright)
-JVarEffPlot = plot(VarAdvanceRatio, EffJVar, label = "Efficiency", legend = :topright)
+#Plotting
+JVarCoefPlot = plot(VarAdvanceRatio, CTJVar, title = "Varying Advance Ratio", label = "Coefficient of Thrust", legend = (.001, .45), xaxis = "Advance Ratio (J)", margin = pad, ylabel = "Coef of Thrust")
+plot!(twinx(), VarAdvanceRatio, CQJVar, label = "Coefficient of Torque", legend = :topright, linecolor = :orange, ylabel = "Coef of Torque")
+JVarEffPlot = plot(VarAdvanceRatio, EffJVar, label = "Efficiency", legend = :topright, margin = pad, title = "Varying Advance Ratio", xaxis = "Advance Ratio (J)")
 JVarPlot = plot(JVarCoefPlot, JVarEffPlot, layout = dims)
 
 
 #? Do I want to vary the twist angle also? what would varying twist look like?
 
-#Plot
-plot(RVarPlot, CVarPlot, PVarPlot, JVarPlot, layout = (2, 2))
+#Plot Palooza
+#plot(RVarPlot, CVarPlot, PVarPlot, JVarPlot, layout = (2, 2))
+#plot!(size = (1800,1000))
 
-
+#plot(RVarCoefPlot,RVarEffPlot,CVarCoefPlot,CVarEffPlot,PVarCoefPlot,PVarEffPlot,JVarCoefPlot,JVarEffPlot,layout = (2,4))
+#=
+PlotArray = []
+push!(PlotArray, RVarCoefPlot)
+push!(PlotArray, RVarEffPlot)
+push!(PlotArray, CVarCoefPlot)
+push!(PlotArray, CVarEffPlot)
+push!(PlotArray, PVarCoefPlot)
+push!(PlotArray, PVarEffPlot)
+push!(PlotArray, JVarCoefPlot)
+push!(PlotArray, JVarEffPlot)
+plot(PlotArray...)
 #plot!(size = (3500,800))    #changes the plot size 
+=#
+display(RVarCoefPlot)
+display(RVarEffPlot)
+display(CVarCoefPlot)
+display(CVarEffPlot)
+display(PVarCoefPlot)
+display(PVarEffPlot)
+display(JVarCoefPlot)
+display(JVarEffPlot)
