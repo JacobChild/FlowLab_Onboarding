@@ -183,14 +183,14 @@ for i = 1:NumofRadiis
     op = simple_op.(Vinf, Omega, rvar.*NewRTip[i], rho) 
     out = solve.(Ref(RVarRotor), sections, op)
     T, Q = thrusttorque(RVarRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    EffRVar[i], CTRVar[i], CQRVar[i] = nondim(T, Q, Vinf, Omega, rho, RVarRotor, "propeller")
+    EffRVar[i], CTRVar[i], CQRVar[i] = nondim(T, Q, Vinf, Omega, rho, RVarRotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
 RVarCoefPlot = plot(NewRTip, CQRVar, title = "Varying Blade Radius", label = "Coefficient of Torque", legend = :topleft, margin = pad, box = :on,)
 plot!(NewRTip, CQRVar.*2 .*pi, label = "Coefficient of Power", linecolor = :orange, ylabel = "Coef of Torque and Power",xlabel = "Radius (m)")
 plot!(twinx(), NewRTip, CTRVar, label = "Coefficient of Thrust", legend = (.6, .7), linecolor = :green, ylabel = "Coef of Thrust")
-RVarEffPlot = plot(NewRTip, EffRVar, label = "Efficiency", legend = :topright, margin = pad, title = "Varying Blade Radius", xlabel = "Radius (m)")
+RVarEffPlot = plot(NewRTip, EffRVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Radius", xlabel = "Radius (m)")
 RVarPlot = plot(RVarCoefPlot, RVarEffPlot, layout = dims)
 
 
@@ -213,13 +213,13 @@ for i = 1:NumofChords
     op = simple_op.(Vinf, Omega, r, rho)
     out = solve.(Ref(rotor), sections, op)
     T, Q = thrusttorque(rotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    EffCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
+    EffCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
 CVarCoefPlot = plot(VarChordPercent, CTCVar, title = "Varying Blade Chord", label = "Coefficient of Thrust", legend = :topleft,xlabel = "Values used to vary Chord (in % of RTip)", margin = pad, ylabel = "Coef of Thrust")
 plot!(twinx(), VarChordPercent, CQCVar, label = "Coefficient of Torque", legend = (.56, .44),linecolor = :orange, ylabel = "Coef of Torque")
-CVarEffPlot = plot(VarChordPercent, EffCVar, label = "Efficiency", legend = :topright, margin = pad, title = "Varying Blade Chord",xlabel = "Values used to vary Chord (in % of RTip)")
+CVarEffPlot = plot(VarChordPercent, EffCVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Chord",xlabel = "Values used to vary Chord (in % of RTip)")
 CVarPlot = plot(CVarCoefPlot, CVarEffPlot, layout = dims)
 
 
@@ -230,7 +230,8 @@ Vary the Pitch- Because we are varying this independently of Rtip we dont need t
 ``` 
 #Input Prep
 NumofPitches = 20 #Number of pitches to vary
-VarPitch = range(-25, 25, length = NumofPitches) #Ranging from pitching down to pitching up
+VarPitch = range(-5, 25, length = NumofPitches) #Ranging from pitching down to pitching up
+#! Pitch has to be limited to about -5 deg or Thrust goes neg and nondim throws an error
 EffPVar = zeros(NumofPitches) #Initialize the efficiency array
 CTPVar = zeros(NumofPitches) #Initialize the CT array
 CQPVar = zeros(NumofPitches) #Initialize the CQ array
@@ -242,13 +243,13 @@ for i = 1:NumofPitches
     op = simple_op.(Vinf, Omega, r, rho; pitch)
     out = solve.(Ref(rotor), PVarSections, op)
     T, Q = thrusttorque(rotor, PVarSections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    EffPVar[i], CTPVar[i], CQPVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
+    EffPVar[i], CTPVar[i], CQPVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
 PVarCoefPlot = plot(VarPitch, CTPVar, title = "Varying Blade Pitch", label = "Coefficient of Thrust", legend = :topleft, xlabel = "Pitch added or subtracted from current value (deg)", margin = pad, ylabel = "Coef of Thrust")
 plot!(twinx(), VarPitch, CQPVar, label = "Coefficient of Torque", legend = (.6,.4), linecolor = :orange, ylabel = "Coef of Torque")
-PVarEffPlot = plot(VarPitch, EffPVar, label = "Efficiency", legend = :topright, title = "Varying Blade Pitch", margin = pad, xlabel = "Pitch added or subtracted from current value (deg)")
+PVarEffPlot = plot(VarPitch, EffPVar, label = "Figure of Merit", legend = :topright, title = "Varying Blade Pitch", margin = pad, xlabel = "Pitch added or subtracted from current value (deg)")
 PVarPlot = plot(PVarCoefPlot, PVarEffPlot, layout = dims, xlabel = "Pitch added or subtracted from current value (deg)")
 
 
@@ -257,7 +258,8 @@ Vary the advance ratios- This is just like in the BEM Project, see BEM Project f
 ```
 #Input Prep
 NumofAdvanceRatios = 20 #Number of advance ratios to vary
-VarAdvanceRatio = range(0.1, .9, length = NumofAdvanceRatios) #The forward speed  goes from 1/10th of rpm to 90% rpm 
+VarAdvanceRatio = range(0.1, .6, length = NumofAdvanceRatios) #The forward speed  goes from 1/10th of rpm to 60% rpm
+#! J has to be limited to .6 as above that Thrust goes neg (drag) and nondim throws an error 
 n = Omega/(2*pi)    # converts radians persecond to just rotations per second, same as rpm/60
 D = 2 * Rtip    #Diameter of the prop is 2* the radius (note: Rtip is defined from center of rotation so includes Rhub)
 EffJVar = zeros(NumofAdvanceRatios) #Initialize the efficiency array
@@ -270,13 +272,13 @@ for i = 1:NumofAdvanceRatios
     local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
     outputs = solve.(Ref(rotor), Normalsections, op) #uses all data from above plus local op conditions
     T, Q = thrusttorque(rotor, Normalsections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    EffJVar[i], CTJVar[i], CQJVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "propeller")
+    EffJVar[i], CTJVar[i], CQJVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
 JVarCoefPlot = plot(VarAdvanceRatio, CTJVar, title = "Varying Advance Ratio", label = "Coefficient of Thrust", legend = (.001, .45), xaxis = "Advance Ratio (J)", margin = pad, ylabel = "Coef of Thrust")
 plot!(twinx(), VarAdvanceRatio, CQJVar, label = "Coefficient of Torque", legend = :topright, linecolor = :orange, ylabel = "Coef of Torque")
-JVarEffPlot = plot(VarAdvanceRatio, EffJVar, label = "Efficiency", legend = :topright, margin = pad, title = "Varying Advance Ratio", xaxis = "Advance Ratio (J)")
+JVarEffPlot = plot(VarAdvanceRatio, EffJVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Advance Ratio", xaxis = "Advance Ratio (J)")
 JVarPlot = plot(JVarCoefPlot, JVarEffPlot, layout = dims)
 
 
