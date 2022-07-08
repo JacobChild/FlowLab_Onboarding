@@ -22,10 +22,14 @@ using Xfoil, CCBlade, DataFrames, Plots, FLOWMath, Dierckx, DelimitedFiles, Plot
 #Plotting Settings
 dims = (1,2) #for plot layouts after each parameter that was varied, ie "subplot" layouts
 pad = 16mm #padding/margin for the plots
-pyplot() #plot package that is being used so the plots come up as seperate figures in the VSCode plot navigator pane 
-
+#pyplot() #plot package that is being used so the plots come up as seperate figures in the VSCode plot navigator pane 
+using PyCall #allows figures you can interact with, ie rotate
+#pygui(true) #makes it so I can rotate the plots
+using PyPlot
 Plots.default(reuse = false) #means that each figure (in pyplot) doesn't overwrite the one before it
 
+#File Parameters
+NumofVars = 50 #length of the variable vectors, ie if =20 then 20 pitches will be tested
 
 #Import the high level csv file
 CmdFileName = "DJI-II.csv"
@@ -98,7 +102,7 @@ cr75 = chord[indexval]/Rtip
 #Fluid Conditions 
 rho = 1.225 #kg/m^3
 mu = 1.78E-5 #kg/m/s
-Vinf = 5.0  #inflow velocity, this means that the solve done below is for a singular advance ratio
+Vinf = 0  #inflow velocity, this means that the solve done below is for a singular advance ratio (hover in this case)
 RPM = 5000
 Omega = RPM*pi/30  #converts rpm to rad/s, derivation: rpm*pi*360deg/(60sec*180deg)-> rpm*pi/30
 
@@ -163,7 +167,7 @@ Normalout = solve.(Ref(rotor), Normalsections, Normalop)  #outputs a struct of r
 Vary the radius- Note, r is a function of Rtip, so first take that out before redefining r
 ```
 #Input Prep 
-NumofRadiis = 20 #Number of radii to vary
+NumofRadiis = NumofVars #Number of radii to vary
 NewRTip = range(5/100, 25/100, length = NumofRadiis) #This is the new Rtip values to vary over
 rvar = r/Rtip #making rvar a function of NewRtip so Rtip can be varied 
 chordrvar = chord/Rtip #making the chord a function of NewRtip so Rtip can be varied
@@ -175,6 +179,7 @@ CQRVar = zeros(NumofRadiis) #Initialize the CQ array
 for i = 1:NumofRadiis
     if rvar[1].*NewRTip[i] < Rhub
         NewRHub = rvar[1].*NewRTip[i] #This is the new hub radius
+        #println("Rhub was updated to $NewRHub for RVar")
     else
         NewRHub = Rhub
     end
@@ -184,14 +189,52 @@ for i = 1:NumofRadiis
     out = solve.(Ref(RVarRotor), sections, op)
     T, Q = thrusttorque(RVarRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     EffRVar[i], CTRVar[i], CQRVar[i] = nondim(T, Q, Vinf, Omega, rho, RVarRotor, "helicopter")
-    # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
-RVarCoefPlot = plot(NewRTip, CQRVar, title = "Varying Blade Radius", label = "Coefficient of Torque", legend = :topleft, margin = pad, box = :on,)
+RVarCoefPlot = Plots.plot(NewRTip, CQRVar, title = "Varying Blade Radius", label = "Coefficient of Torque", legend = :topleft, margin = pad, box = :on,)
 plot!(NewRTip, CQRVar.*2 .*pi, label = "Coefficient of Power", linecolor = :orange, ylabel = "Coef of Torque and Power",xlabel = "Radius (m)")
-plot!(twinx(), NewRTip, CTRVar, label = "Coefficient of Thrust", legend = (.6, .7), linecolor = :green, ylabel = "Coef of Thrust")
-RVarEffPlot = plot(NewRTip, EffRVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Radius", xlabel = "Radius (m)")
-RVarPlot = plot(RVarCoefPlot, RVarEffPlot, layout = dims)
+plot!(Plots.twinx(), NewRTip, CTRVar, label = "Coefficient of Thrust", legend = (.6, .7), linecolor = :green, ylabel = "Coef of Thrust")
+RVarEffPlot = Plots.plot(NewRTip, EffRVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Radius", xlabel = "Radius (m)")
+RVarPlot = Plots.plot(RVarCoefPlot, RVarEffPlot, layout = dims)
+
+#Redo the above but vary RPM and plot as a surface
+RPMVar = range(1000, 10000, length = NumofVars) #This is the RPM values to vary over
+#? how do I deal with RHub as I can't run an if statement
+function RSurfaceFunc(SRPM,SNewRTip;spitout) #! I think I need to do a nested for loop w/rpm and radius
+    println(SRPM)
+    println(SNewRTip)
+    for i = 1:NumofRadiis
+        if rvar[1]*SNewRTip[i] < Rhub
+            NewRHub = rvar[1]*SNewRTip[i] #This is the new hub radius
+            #println("Rhub was updated to $NewRHub for RVar")
+        else
+            NewRHub = Rhub
+        end
+        for k = 1:NumofVars
+            SOmega = (pi/30)*SRPM[k]
+            RVarRotor = Rotor(NewRHub, SNewRTip[i], NumofBlades) #This is the new rotor object
+            sections = Section.(rvar.*SNewRTip[i], chordrvar.*SNewRTip[i], twist, airfoils)
+            op = simple_op.(Vinf, SOmega, rvar.*SNewRTip[i], rho) 
+            out = solve.(Ref(RVarRotor), sections, op)
+            T, Q = thrusttorque(RVarRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+            EffRVar[k], CTRVar[k], CQRVar[k] = nondim(T, Q, Vinf, Omega, rho, RVarRotor, "helicopter")
+            #println(EffRVar)
+        end
+    end
+    if spitout == "Eff"
+        println(EffRVar)
+        return EffRVar
+    elseif spitout == "CT"
+        return CTRVar
+    elseif spitout == "CQ"
+        return CQRVar
+    else
+        println("Keyword argument error")
+    end
+
+end
+println("did we get here") #!the above function is broken and shouldn't be trusted
+RVarSurfacePlot = surface(RPMVar, NewRTip, RSurfaceFunc(RPMVar, NewRTip; spitout = "Eff"), title = "Varying RPM and Blade Radius", label = "Efficiency", legend = :topleft, margin = pad, box = :on)
 
 
 ```
@@ -201,7 +244,7 @@ Vary the chord- Because we are varying this independently of Rtip we dont need t
 ```
 #Input Prep
 CVarchord = chord/Rtip #this makes it so we can vary chord as a percent of Rtip, rather than a fixed measurement
-NumofChords = 20 #Number of chords to vary
+NumofChords = NumofVars #Number of chords to vary
 VarChordPercent = range(-.09, .09, length = NumofChords) #The OG min % is .097 (so we can't subtract more than that) max % is .28
 EffCVar = zeros(NumofChords) #Initialize the efficiency array
 CTCVar = zeros(NumofChords) #Initialize the CT array
@@ -217,10 +260,10 @@ for i = 1:NumofChords
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
-CVarCoefPlot = plot(VarChordPercent, CTCVar, title = "Varying Blade Chord", label = "Coefficient of Thrust", legend = :topleft,xlabel = "Values used to vary Chord (in % of RTip)", margin = pad, ylabel = "Coef of Thrust")
-plot!(twinx(), VarChordPercent, CQCVar, label = "Coefficient of Torque", legend = (.56, .44),linecolor = :orange, ylabel = "Coef of Torque")
-CVarEffPlot = plot(VarChordPercent, EffCVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Chord",xlabel = "Values used to vary Chord (in % of RTip)")
-CVarPlot = plot(CVarCoefPlot, CVarEffPlot, layout = dims)
+CVarCoefPlot = Plots.plot(VarChordPercent, CTCVar, title = "Varying Blade Chord", label = "Coefficient of Thrust", legend = :topleft,xlabel = "Values used to vary Chord (in % of RTip)", margin = pad, ylabel = "Coef of Thrust")
+plot!(Plots.twinx(), VarChordPercent, CQCVar, label = "Coefficient of Torque", legend = (.56, .44),linecolor = :orange, ylabel = "Coef of Torque")
+CVarEffPlot = Plots.plot(VarChordPercent, EffCVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Chord",xlabel = "Values used to vary Chord (in % of RTip)")
+CVarPlot = Plots.plot(CVarCoefPlot, CVarEffPlot, layout = dims)
 
 
 ```
@@ -229,8 +272,8 @@ Vary the Pitch- Because we are varying this independently of Rtip we dont need t
     of the loop. This will "Pitch" the whole blade up or down, think like angle of attack 
 ``` 
 #Input Prep
-NumofPitches = 20 #Number of pitches to vary
-VarPitch = range(-5, 25, length = NumofPitches) #Ranging from pitching down to pitching up
+NumofPitches = NumofVars #Number of pitches to vary
+VarPitch = range(-2, 25, length = NumofPitches) #Ranging from pitching down to pitching up
 #! Pitch has to be limited to about -5 deg or Thrust goes neg and nondim throws an error
 EffPVar = zeros(NumofPitches) #Initialize the efficiency array
 CTPVar = zeros(NumofPitches) #Initialize the CT array
@@ -247,17 +290,17 @@ for i = 1:NumofPitches
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
-PVarCoefPlot = plot(VarPitch, CTPVar, title = "Varying Blade Pitch", label = "Coefficient of Thrust", legend = :topleft, xlabel = "Pitch added or subtracted from current value (deg)", margin = pad, ylabel = "Coef of Thrust")
-plot!(twinx(), VarPitch, CQPVar, label = "Coefficient of Torque", legend = (.6,.4), linecolor = :orange, ylabel = "Coef of Torque")
-PVarEffPlot = plot(VarPitch, EffPVar, label = "Figure of Merit", legend = :topright, title = "Varying Blade Pitch", margin = pad, xlabel = "Pitch added or subtracted from current value (deg)")
-PVarPlot = plot(PVarCoefPlot, PVarEffPlot, layout = dims, xlabel = "Pitch added or subtracted from current value (deg)")
+PVarCoefPlot = Plots.plot(VarPitch, CTPVar, title = "Varying Blade Pitch", label = "Coefficient of Thrust", legend = :topleft, xlabel = "Pitch added or subtracted from current value (deg)", margin = pad, ylabel = "Coef of Thrust")
+plot!(Plots.twinx(), VarPitch, CQPVar, label = "Coefficient of Torque", legend = (.6,.4), linecolor = :orange, ylabel = "Coef of Torque")
+PVarEffPlot = Plots.plot(VarPitch, EffPVar, label = "Figure of Merit", legend = :topright, title = "Varying Blade Pitch", margin = pad, xlabel = "Pitch added or subtracted from current value (deg)")
+PVarPlot = Plots.plot(PVarCoefPlot, PVarEffPlot, layout = dims, xlabel = "Pitch added or subtracted from current value (deg)")
 
 
 ```
 Vary the advance ratios- This is just like in the BEM Project, see BEM Project folder and Jupyter NB
 ```
 #Input Prep
-NumofAdvanceRatios = 20 #Number of advance ratios to vary
+NumofAdvanceRatios = NumofVars #Number of advance ratios to vary
 VarAdvanceRatio = range(0.1, .6, length = NumofAdvanceRatios) #The forward speed  goes from 1/10th of rpm to 60% rpm
 #! J has to be limited to .6 as above that Thrust goes neg (drag) and nondim throws an error 
 n = Omega/(2*pi)    # converts radians persecond to just rotations per second, same as rpm/60
@@ -276,10 +319,10 @@ for i = 1:NumofAdvanceRatios
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
-JVarCoefPlot = plot(VarAdvanceRatio, CTJVar, title = "Varying Advance Ratio", label = "Coefficient of Thrust", legend = (.001, .45), xaxis = "Advance Ratio (J)", margin = pad, ylabel = "Coef of Thrust")
-plot!(twinx(), VarAdvanceRatio, CQJVar, label = "Coefficient of Torque", legend = :topright, linecolor = :orange, ylabel = "Coef of Torque")
-JVarEffPlot = plot(VarAdvanceRatio, EffJVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Advance Ratio", xaxis = "Advance Ratio (J)")
-JVarPlot = plot(JVarCoefPlot, JVarEffPlot, layout = dims)
+JVarCoefPlot = Plots.plot(VarAdvanceRatio, CTJVar, title = "Varying Advance Ratio", label = "Coefficient of Thrust", legend = (.001, .45), xaxis = "Advance Ratio (J)", margin = pad, ylabel = "Coef of Thrust")
+plot!(Plots.twinx(), VarAdvanceRatio, CQJVar, label = "Coefficient of Torque", legend = :topright, linecolor = :orange, ylabel = "Coef of Torque")
+JVarEffPlot = Plots.plot(VarAdvanceRatio, EffJVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Advance Ratio", xaxis = "Advance Ratio (J)")
+JVarPlot = Plots.plot(JVarCoefPlot, JVarEffPlot, layout = dims)
 
 
 #? Do I want to vary the twist angle also? what would varying twist look like?
@@ -310,3 +353,4 @@ display(PVarCoefPlot)
 display(PVarEffPlot)
 display(JVarCoefPlot)
 display(JVarEffPlot)
+display(RVarSurfacePlot)

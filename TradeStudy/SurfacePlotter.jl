@@ -19,6 +19,7 @@ cd("C:/Users/child/Documents/Flow_Lab/Onboarding/TradeStudy")
 
 #Function Fun 
 function CoefThrustFunc(SRPM,SVarPitch)
+    #println(SRPM)
     SOmega = (pi/30).*SRPM  #converts rpm to rad/s, derivation: rpm*pi*360deg/(60sec*180deg)-> rpm*pi/30
     pitch = SVarPitch*pi/180 #This is the pitch angle to use
     Sop = simple_op.(Vinf, SOmega, Sr, rho; pitch)
