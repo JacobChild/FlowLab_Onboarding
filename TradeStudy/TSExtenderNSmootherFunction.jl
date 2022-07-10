@@ -80,17 +80,18 @@ CombCm = cat(Cm, SmoothCm, dims = (2,2))
 Plot Palooza
 Saves the various plots as plot objects and combines all plot objects of a coefficient into one plot object
 """
-CombClPlot = Plots.plot(Combalphadegs,CombCl, title = "Cl Plots", label = ["Org" "Smooth"])
-CombExtendedClPlot = Plots.plot(Combnewalphadegs, CombExtendedCl, label = ["Org" "Smooth"])
-FullClPlot = Plots.plot(CombClPlot,CombExtendedClPlot, layout = (2,1), legend = false)
+#= #Needs Plots to run
+CombClPlot = plot(Combalphadegs,CombCl, title = "Cl Plots", label = ["Org" "Smooth"])
+CombExtendedClPlot = plot(Combnewalphadegs, CombExtendedCl, label = ["Org" "Smooth"])
+FullClPlot = plot(CombClPlot,CombExtendedClPlot, layout = (2,1), legend = false)
 
-CombCdPlot = Plots.plot(Combalphadegs,CombCd, title = "Cd Plots", label = ["Org" "Smooth"])
-CombExtendedCdPlot = Plots.plot(Combnewalphadegs, CombExtendedCd, label = ["Org" "Smooth"])
-FullCdPlot = Plots.plot(CombCdPlot,CombExtendedCdPlot, layout = (2,1), legend = false)
+CombCdPlot = plot(Combalphadegs,CombCd, title = "Cd Plots", label = ["Org" "Smooth"])
+CombExtendedCdPlot = plot(Combnewalphadegs, CombExtendedCd, label = ["Org" "Smooth"])
+FullCdPlot = plot(CombCdPlot,CombExtendedCdPlot, layout = (2,1), legend = false)
 
-CombCdpPlot = Plots.plot(Combalphadegs,CombCdp, title = "Cdp Plots", label = ["Org" "Smooth"])
+CombCdpPlot = plot(Combalphadegs,CombCdp, title = "Cdp Plots", label = ["Org" "Smooth"])
 
-CombCmPlot = Plots.plot(Combalphadegs,CombCm, title = "Cm Plots", label = ["Org" "Smooth"])
+CombCmPlot = plot(Combalphadegs,CombCm, title = "Cm Plots", label = ["Org" "Smooth"])
 
 #Creates an array of Plot objects (from the above Plot Palooza) and plots them
 PlotArray = []
@@ -101,7 +102,7 @@ push!(PlotArray,CombCmPlot)
 #plot(PlotArray...)
 #display(FullClPlot)
 #plot!(size = (1000,900),legend = true)    #changes the plot size 
-
+=#
 #Output to a file
 #touch("CurrentAirfoilData.txt")  #creates the file
 open("CurrentAirfoilData.txt", "w") do FileID
@@ -118,6 +119,6 @@ writedlm(FileID, DataTable)     #uses DelimitedFiles package, I believe default 
 
 end
 
-return PlotArray, newalphadegs, ExtendedSmoothCl, ExtendedSmoothCd
-
+#return PlotArray, newalphadegs, ExtendedSmoothCl, ExtendedSmoothCd
+return newalphadegs, ExtendedSmoothCl, ExtendedSmoothCd
 end
