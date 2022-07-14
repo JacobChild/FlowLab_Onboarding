@@ -80,7 +80,7 @@ function PVarSurface(SRPM, SVarPitch; spitout)
     end
 end
 
-function FindFunc(Search,Find)
+function FindFunc(Search::StepRangeLen,Find)
 	stepsize= parse(Float64, string(Search.step)[30:findall(k->k==',',string(Search.step))[1]-1])/2
 	location = findall(k-> k-stepsize<Find<k+stepsize,Search)
 
