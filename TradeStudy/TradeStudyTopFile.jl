@@ -18,7 +18,10 @@ TODO for to-dos
 =#
 
 #Needed packages for the whole project, and function file 
-using Xfoil, CCBlade, DataFrames, FLOWMath, Dierckx, DelimitedFiles, Plots.Measures, Plots
+using Revise, Xfoil, DataFrames, FLOWMath, Dierckx, DelimitedFiles, Plots.Measures, Plots, CCBlade
+#using JCDevCCBlade #? Come back to trying to make this package work, right now it is taking too much time.
+#MyDevCCBlade is the CCBlade package plus an if statement that sets the figure of merit to zero when T < 0
+#You are welcome to use CCBlade like normal, but may need to narrow the variable ranges to avoid errors
 include("FunctionFile.jl")
 #Plotting Settings
 dims = (1,2) #for plot layouts after each parameter that was varied, ie "subplot" layouts
@@ -175,9 +178,12 @@ NumofRadiis = NumofVars #Number of radii to vary
 NewRTip = range(5/100, 25/100, length = NumofRadiis) #This is the new Rtip values to vary over
 rvar = r/Rtip #making rvar a function of NewRtip so Rtip can be varied 
 chordrvar = chord/Rtip #making the chord a function of NewRtip so Rtip can be varied
-FMRVar = zeros(NumofVars, NumofVars) #Initialize the efficiency array
-CTRVar = zeros(NumofVars, NumofVars) #Initialize the CT array
-CQRVar = zeros(NumofVars, NumofVars) #Initialize the CQ array
+FMRVar = zeros(NumofVars) #Initialize the efficiency array
+CTRVar = zeros(NumofVars) #Initialize the CT array
+CQRVar = zeros(NumofVars) #Initialize the CQ array
+FMRVarS = zeros(NumofVars, NumofVars) #Initialize the efficiency array
+CTRVarS = zeros(NumofVars, NumofVars) #Initialize the CT array
+CQRVarS = zeros(NumofVars, NumofVars) #Initialize the CQ array
 
 #Calculate and output
 for i = 1:NumofRadiis
@@ -202,8 +208,9 @@ RVarFMPlot = plot(NewRTip, FMRVar, label = "Figure of Merit", legend = :topright
 RVarPlot = plot(RVarCoefPlot, RVarFMPlot, layout = dims)
 
 #Redo the above but vary RPM and plot as a surface
-
-
+RVarCTSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "CT"))
+RVarCQSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "CQ"))
+RVarFMSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "FM"))
 
 
 ```
@@ -215,9 +222,12 @@ Vary the chord- Because we are varying this independently of Rtip we dont need t
 CVarchord = chord/Rtip #this makes it so we can vary chord as a percent of Rtip, rather than a fixed measurement
 NumofChords = NumofVars #Number of chords to vary
 VarChordPercent = range(-.09, .09, length = NumofChords) #The OG min % is .097 (so we can't subtract more than that) max % is .28
-FMCVar = zeros(NumofVars, NumofVars) #Initialize the efficiency array
-CTCVar = zeros(NumofVars, NumofVars) #Initialize the CT array
-CQCVar = zeros(NumofVars, NumofVars) #Initialize the CQ array
+FMCVar = zeros(NumofVars) #Initialize the efficiency array
+CTCVar = zeros(NumofVars) #Initialize the CT array
+CQCVar = zeros(NumofVars) #Initialize the CQ array
+FMCVarS = zeros(NumofVars, NumofVars) #Initialize the efficiency array
+CTCVarS = zeros(NumofVars, NumofVars) #Initialize the CT array
+CQCVarS = zeros(NumofVars, NumofVars) #Initialize the CQ array
 
 #Calculate and output
 for i = 1:NumofChords
@@ -234,6 +244,11 @@ plot!(twinx(), VarChordPercent, CQCVar, label = "CoFMicient of Torque", legend =
 CVarFMPlot = plot(VarChordPercent, FMCVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Chord",xlabel = "Values used to vary Chord (in % of RTip)")
 CVarPlot = plot(CVarCoefPlot, CVarFMPlot, layout = dims)
 
+#Redo the above but vary RPM and plot as a surface
+CVarCTSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "CT"))
+CVarCQSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "CQ"))
+CVarFMSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "FM"))
+
 
 ```
 Vary the Pitch- Because we are varying this independently of Rtip we dont need to divide it out
@@ -242,12 +257,15 @@ Vary the Pitch- Because we are varying this independently of Rtip we dont need t
 ``` 
 #Input Prep
 NumofPitches = NumofVars #Number of pitches to vary
-VarPitch = range(-2, 25, length = NumofPitches) #Ranging from pitching down to pitching up
+VarPitch = range(-15, 25, length = NumofPitches) #Ranging from pitching down to pitching up
 #! Pitch has to be limited to about -5 deg or Thrust goes neg and nondim throws an error
-FMPVar = zeros(NumofVars, NumofVars) #Initialize the efficiency array
-CTPVar = zeros(NumofVars, NumofVars) #Initialize the CT array
-CQPVar = zeros(NumofVars, NumofVars) #Initialize the CQ array
+FMPVar = zeros(NumofVars) #Initialize the efficiency array
+CTPVar = zeros(NumofVars) #Initialize the CT array
+CQPVar = zeros(NumofVars) #Initialize the CQ array
 PVarSections = Section.(r, chord, twist, airfoils) #Defining the sections to use
+FMPVarS = zeros(NumofVars, NumofVars) #Initialize the efficiency array
+CTPVarS = zeros(NumofVars, NumofVars) #Initialize the CT array
+CQPVarS = zeros(NumofVars, NumofVars) #Initialize the CQ array
 
 #Calculate and output
 for i = 1:NumofPitches
@@ -264,6 +282,11 @@ plot!(twinx(), VarPitch, CQPVar, label = "Coefficient of Torque", legend = (.6,.
 PVarFMPlot = plot(VarPitch, FMPVar, label = "Figure of Merit", legend = :topright, title = "Varying Blade Pitch", margin = pad, xlabel = "Pitch added or subtracted from current value (deg)")
 PVarPlot = plot(PVarCoefPlot, PVarFMPlot, layout = dims, xlabel = "Pitch added or subtracted from current value (deg)")
 
+#Redo the above but vary RPM and plot as a surface
+PVarCTSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "CT"))
+PVarCQSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "CQ"))
+PVarFMSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "FM"))
+
 
 ```
 Vary the advance ratios- This is just like in the BEM Project, see BEM Project folder and Jupyter NB
@@ -273,10 +296,14 @@ NumofAdvanceRatios = NumofVars #Number of advance ratios to vary
 VarAdvanceRatio = range(0.1, .6, length = NumofAdvanceRatios) #The forward speed  goes from 1/10th of rpm to 60% rpm
 #! J has to be limited to .6 as above that Thrust goes neg (drag) and nondim throws an error 
 n = Omega/(2*pi)    # converts radians persecond to just rotations per second, same as rpm/60
+nS = zeros(NumofVars)
 D = 2 * Rtip    #Diameter of the prop is 2* the radius (note: Rtip is defined from center of rotation so includes Rhub)
-FMJVar = zeros(NumofVars, NumofVars) #Initialize the efficiency array
-CTJVar = zeros(NumofVars, NumofVars) #Initialize the CT array
-CQJVar = zeros(NumofVars, NumofVars) #Initialize the CQ array
+FMJVar = zeros(NumofVars) #Initialize the efficiency array
+CTJVar = zeros(NumofVars) #Initialize the CT array
+CQJVar = zeros(NumofVars) #Initialize the CQ array
+FMJVarS = zeros(NumofVars, NumofVars) #Initialize the efficiency array
+CTJVarS = zeros(NumofVars, NumofVars) #Initialize the CT array
+CQJVarS = zeros(NumofVars, NumofVars) #Initialize the CQ array
 
 #Calculate and output
 for i = 1:NumofAdvanceRatios
@@ -292,6 +319,11 @@ JVarCoefPlot = plot(VarAdvanceRatio, CTJVar, title = "Varying Advance Ratio", la
 plot!(twinx(), VarAdvanceRatio, CQJVar, label = "Coefficient of Torque", legend = :topright, linecolor = :orange, ylabel = "Coef of Torque")
 JVarFMPlot = plot(VarAdvanceRatio, FMJVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Advance Ratio", xaxis = "Advance Ratio (J)")
 JVarPlot = plot(JVarCoefPlot, JVarFMPlot, layout = dims)
+
+#Redo the above but vary RPM and plot as a surface
+JVarCTSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "CT"))
+JVarCQSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "CQ"))
+JVarFMSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "FM"))
 
 
 #? Do I want to vary the twist angle also? what would varying twist look like?
@@ -322,4 +354,15 @@ display(PVarCoefPlot)
 display(PVarFMPlot)
 display(JVarCoefPlot)
 display(JVarFMPlot)
-display(RVarSurfacePlot)
+display(RVarCTSurfacePlot)
+display(RVarCQSurfacePlot)
+display(RVarFMSurfacePlot)
+display(CVarCTSurfacePlot)
+display(CVarCQSurfacePlot)
+display(CVarFMSurfacePlot)
+display(PVarCTSurfacePlot)
+display(PVarCQSurfacePlot)
+display(PVarFMSurfacePlot)
+display(JVarCTSurfacePlot)
+display(JVarCQSurfacePlot)
+display(JVarFMSurfacePlot)

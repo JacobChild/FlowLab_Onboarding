@@ -1,6 +1,8 @@
 #FunctionFile.jl
 
 #Remember for surfaces to work, it must return a matrix with rows and cols the size of the inputs
+#The output var names were changed to differ from the normal plots by putting an "S" at the end, 
+#   ie FMRVarS etc, The "S" represents "Surface"
 
 function RVarSurface(SRPM,NewRTip;spitout)
     for k = 1:length(SRPM)
@@ -8,9 +10,10 @@ function RVarSurface(SRPM,NewRTip;spitout)
         for i = 1:NumofRadiis
             if rvar[1].*NewRTip[i] < Rhub
                 NewRHub = rvar[1].*NewRTip[i] #This is the new hub radius
-                println("Rhub was updated to $NewRHub for RVar")
+                #println("Rhub was updated to $NewRHub for RVar")
             else
                 NewRHub = Rhub
+                #println("Rhub stays the same")
             end
             SOmega = (pi/30)*SRPM[k]  #converts rpm to rad/s, derivation: rpm*pi*360deg/(60sec*180deg)-> rpm*pi/30
             RVarRotor = Rotor(NewRHub, NewRTip[i], NumofBlades) #This is the new rotor object
@@ -18,15 +21,15 @@ function RVarSurface(SRPM,NewRTip;spitout)
             op = simple_op.(Vinf, SOmega, rvar.*NewRTip[i], rho) 
             out = solve.(Ref(RVarRotor), sections, op)
             T, Q = thrusttorque(RVarRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-            FMRVar[i,k], CTRVar[i,k], CQRVar[i,k] = nondim(T, Q, Vinf, SOmega, rho, RVarRotor, "helicopter")
+            FMRVarS[i,k], CTRVarS[i,k], CQRVarS[i,k] = nondim(T, Q, Vinf, SOmega, rho, RVarRotor, "helicopter")
         end
     end
     if spitout == "FM"
-        return FMRVar
+        return FMRVarS
     elseif spitout == "CT"
-        return CTRVar
+        return CTRVarS
     elseif spitout == "CQ"
-        return CQRVar
+        return CQRVarS
     else
         println("Keyword argument error")
     end
@@ -40,16 +43,16 @@ function CVarSurface(SRPM, VarChordPercent; spitout)
             op = simple_op.(Vinf, SOmega, r, rho)
             out = solve.(Ref(rotor), sections, op)
             T, Q = thrusttorque(rotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-            FMCVar[i,k], CTCVar[i,k], CQCVar[i,k] = nondim(T, Q, Vinf, SOmega, rho, rotor, "helicopter")
+            FMCVarS[i,k], CTCVarS[i,k], CQCVarS[i,k] = nondim(T, Q, Vinf, SOmega, rho, rotor, "helicopter")
             # calcs the coef of the blade under the given conditions at each advance ratio
         end
     end
     if spitout == "FM"
-        return FMCVar
+        return FMCVarS
     elseif spitout == "CT"
-        return CTCVar
+        return CTCVarS
     elseif spitout == "CQ"
-        return CQCVar
+        return CQCVarS
     else
         println("Keyword argument error")
     end
@@ -65,20 +68,46 @@ function PVarSurface(SRPM, SVarPitch; spitout)
             op = simple_op.(Vinf, SOmega, r, rho; pitch)
             out = solve.(Ref(rotor), PVarSections, op)
             T, Q = thrusttorque(rotor, PVarSections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-            FMPVar[i,k], CTPVar[i,k], CQPVar[i,k] = nondim(T, Q, Vinf, SOmega, rho, rotor, "helicopter")
+            FMPVarS[i,k], CTPVarS[i,k], CQPVarS[i,k] = nondim(T, Q, Vinf, SOmega, rho, rotor, "helicopter")
             # calcs the coef of the blade under the given conditions at each advance ratio
         end
     end
     if spitout == "FM"
-        return FMPVar
+        return FMPVarS
     elseif spitout == "CT"
-        return CTPVar
+        return CTPVarS
     elseif spitout == "CQ"
-        return CQPVar
+        return CQPVarS
     else
         println("Keyword argument error")
     end
 end
+
+function JVarSurface(SRPM, VarAdvanceRatio; spitout)
+    for k = 1:NumofVars
+        nS[k] = SRPM[k]/60 #ie n = rotations per second 
+        for i = 1:NumofAdvanceRatios
+            local Vinf = VarAdvanceRatio[i] * D * nS[k]   #makes a local inflow veloc var at each advance ratio 
+            local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
+            outputs = solve.(Ref(rotor), Normalsections, op) #uses all data from above plus local op conditions
+            T, Q = thrusttorque(rotor, Normalsections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+            FMJVarS[i,k], CTJVarS[i,k], CQJVarS[i,k] = nondim(T, Q, Vinf, Omega, rho, rotor, "helicopter")
+            # calcs the coef of the blade under the given conditions at each advance ratio
+        end
+    end
+
+    if spitout == "FM"
+        return FMJVarS
+    elseif spitout == "CT"
+        return CTJVarS
+    elseif spitout == "CQ"
+        return CQJVarS
+    else
+        println("Keyword argument error")
+    end
+
+end
+
 
 function FindFunc(Search::StepRangeLen,Find)
 	stepsize= parse(Float64, string(Search.step)[30:findall(k->k==',',string(Search.step))[1]-1])/2
