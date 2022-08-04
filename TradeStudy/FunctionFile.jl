@@ -41,9 +41,9 @@ function CVarSurface(SRPM, VarChordPercent; spitout)
             SOmega = (pi/30)*SRPM[k]  #converts rpm to rad/s, derivation: rpm*pi*360deg/(60sec*180deg)-> rpm*pi/30
             sections = Section.(r, ((CVarchord.+VarChordPercent[i]).*Rtip), twist, airfoils)
             op = simple_op.(Vinf, SOmega, r, rho)
-            out = solve.(Ref(rotor), sections, op)
-            T, Q = thrusttorque(rotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-            FMCVarS[i,k], CTCVarS[i,k], CQCVarS[i,k] = nondim(T, Q, Vinf, SOmega, rho, rotor, "helicopter")
+            out = solve.(Ref(MyRotor), sections, op)
+            T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+            FMCVarS[i,k], CTCVarS[i,k], CQCVarS[i,k] = nondim(T, Q, Vinf, SOmega, rho, MyRotor, "helicopter")
             # calcs the coef of the blade under the given conditions at each advance ratio
         end
     end
@@ -66,9 +66,9 @@ function PVarSurface(SRPM, SVarPitch; spitout)
             SOmega = (pi/30).*SRPM[k]
             pitch = SVarPitch[i]*pi/180 #This is the pitch angle to use
             op = simple_op.(Vinf, SOmega, r, rho; pitch)
-            out = solve.(Ref(rotor), PVarSections, op)
-            T, Q = thrusttorque(rotor, PVarSections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-            FMPVarS[i,k], CTPVarS[i,k], CQPVarS[i,k] = nondim(T, Q, Vinf, SOmega, rho, rotor, "helicopter")
+            out = solve.(Ref(MyRotor), PVarSections, op)
+            T, Q = thrusttorque(MyRotor, PVarSections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+            FMPVarS[i,k], CTPVarS[i,k], CQPVarS[i,k] = nondim(T, Q, Vinf, SOmega, rho, MyRotor, "helicopter")
             # calcs the coef of the blade under the given conditions at each advance ratio
         end
     end
@@ -89,9 +89,9 @@ function JVarSurface(SRPM, VarAdvanceRatio; spitout)
         for i = 1:NumofAdvanceRatios
             local Vinf = VarAdvanceRatio[i] * D * nS[k]   #makes a local inflow veloc var at each advance ratio 
             local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
-            outputs = solve.(Ref(rotor), Normalsections, op) #uses all data from above plus local op conditions
-            T, Q = thrusttorque(rotor, Normalsections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-            FMJVarS[i,k], CTJVarS[i,k], CQJVarS[i,k] = nondim(T, Q, Vinf, Omega, rho, rotor, "helicopter")
+            outputs = solve.(Ref(MyRotor), Normalsections, op) #uses all data from above plus local op conditions
+            T, Q = thrusttorque(MyRotor, Normalsections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+            FMJVarS[i,k], CTJVarS[i,k], CQJVarS[i,k] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
             # calcs the coef of the blade under the given conditions at each advance ratio
         end
     end

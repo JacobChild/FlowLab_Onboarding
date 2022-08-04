@@ -7,6 +7,11 @@ advance ratio, and radius are independently varied.
 Pseudocode: Open the high level csv file and from that get the neccessary propeller data 
 and file names for where to extract the addtional data.
 
+It has been coded in such a way that if you set up your blade file structure
+(containing geometry and airfoil performance) in the same way as the "data" folder found
+https://github.com/byuflowlab/FLOWUnsteady  you only need to change the variable CmdFileName
+found around line 53 to your "command file" name.
+
  cd("C:/Users/child/Documents/Flow_Lab/Onboarding/TradeStudy")
 
  Note: I used the "Better Comments" Extension to help find things, the legend is below
@@ -18,7 +23,7 @@ TODO for to-dos
 =#
 
 #Needed packages for the whole project, and function file 
-using Revise, Xfoil, DataFrames, FLOWMath, Dierckx, DelimitedFiles, Plots.Measures, Plots, CCBlade
+using Revise, Xfoil, DataFrames, FLOWMath, Dierckx, DelimitedFiles, Plots.Measures, Plots, CCBlade, Printf
 #using JCDevCCBlade #? Come back to trying to make this package work, right now it is taking too much time.
 #MyDevCCBlade is the CCBlade package plus an if statement that sets the figure of merit to zero when T < 0
 #You are welcome to use CCBlade like normal, but may need to narrow the variable ranges to avoid errors
@@ -54,7 +59,7 @@ NumofBlades = cmdfile[4,2]
 BladeFileName = cmdfile[5,2]
 
 #Define the rotor object
-rotor = Rotor(Rhub, Rtip, NumofBlades) #stores a "Rotor" object
+MyRotor= Rotor(Rhub, Rtip, NumofBlades) #stores a "Rotor" object
 
 #Import the blade directory file
 BladeFile = readdlm("data\\rotors\\$BladeFileName", ',')
@@ -77,7 +82,7 @@ chord = ChordDist[2:end,2] .* Rtip
 #! if the first value of r < Rhub it will throw the acos bounds error
 if r[1] < Rhub
     Rhub = r[1]
-    rotor = Rotor(Rhub, Rtip, NumofBlades) #redefines and stores the "Rotor" object
+    MyRotor= Rotor(Rhub, Rtip, NumofBlades) #redefines and stores the "Rotor" object
     println("RHub was redefined to: $Rhub, and the rotor object was redefined")
 end
 
@@ -167,7 +172,7 @@ airfoils = aftypes[af_idx]  #This is the array of airfoil objects that correspon
 # Outputs before varying anything, ie "Normal"
 Normalsections = Section.(r, chord, twist, airfoils)    #This is the reference with everything unchanged
 Normalop = simple_op.(Vinf, Omega, r, rho) #The Normal operating points
-Normalout = solve.(Ref(rotor), Normalsections, Normalop)  #outputs a struct of results for each section/radial location
+Normalout = solve.(Ref(MyRotor), Normalsections, Normalop)  #outputs a struct of results for each section/radial location
 
 #Vary the Variables- Rtip, chord, twist
 ```
@@ -184,33 +189,37 @@ CQRVar = zeros(NumofVars) #Initialize the CQ array
 FMRVarS = zeros(NumofVars, NumofVars) #Initialize the efficiency array
 CTRVarS = zeros(NumofVars, NumofVars) #Initialize the CT array
 CQRVarS = zeros(NumofVars, NumofVars) #Initialize the CQ array
+SaveT = zeros(NumofVars)
+SaveQ = zeros(NumofVars)
 
 #Calculate and output
 for i = 1:NumofRadiis
-    if rvar[1].*NewRTip[i] < Rhub
+    #if rvar[1].*NewRTip[i] < Rhub
         NewRHub = rvar[1].*NewRTip[i] #This is the new hub radius
+        #println("NewRHub is $NewRHub, NewRTip is $(NewRTip[i])")
         #println("Rhub was updated to $NewRHub for RVar")
-    else
-        NewRHub = Rhub
-    end
+    #else
+    #    NewRHub = Rhub
+    #end
     RVarRotor = Rotor(NewRHub, NewRTip[i], NumofBlades) #This is the new rotor object
+    #println(RVarRotor.Rtip*cos(RVarRotor.precone))
     sections = Section.(rvar.*NewRTip[i], chordrvar.*NewRTip[i], twist, airfoils)
     op = simple_op.(Vinf, Omega, rvar.*NewRTip[i], rho) 
     out = solve.(Ref(RVarRotor), sections, op)
-    T, Q = thrusttorque(RVarRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    FMRVar[i], CTRVar[i], CQRVar[i] = nondim(T, Q, Vinf, Omega, rho, RVarRotor, "helicopter")
+    SaveT[i], SaveQ[i] = thrusttorque(RVarRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    FMRVar[i], CTRVar[i], CQRVar[i] = nondim(SaveT[i], SaveQ[i], Vinf, Omega, rho, RVarRotor, "helicopter")
 end
 #Plotting
-RVarCoefPlot = plot(NewRTip, CQRVar, title = "Varying Blade Radius", label = "Coefficient of Torque", legend = :topleft, margin = pad, box = :on,)
-plot!(NewRTip, CQRVar.*2 .*pi, label = "Coefficient of Power", linecolor = :orange, ylabel = "Coef of Torque and Power",xlabel = "Radius (m)")
-plot!(twinx(), NewRTip, CTRVar, label = "Coefficient of Thrust", legend = (.6, .7), linecolor = :green, ylabel = "Coef of Thrust")
+RVarCoefPlot = plot(NewRTip, CQRVar, title = "Varying Blade Radius", label = "Coefficient of Torque", legend = :topleft, margin = pad, box = :on, yformatter=y->round(y; digits=4), ylabel = "Coefficient of Torque")
+#plot!(NewRTip, CQRVar.*2 .*pi, label = "Coefficient of Power", linecolor = :orange, ylabel = "Coef of Torque and Power",xlabel = "Radius (m)")
+plot!(twinx(), NewRTip, CTRVar, label = "Coefficient of Thrust", legend = (.6, .7), linecolor = :green, ylabel = "Coef of Thrust", yformatter=y->round(y; digits=4), xlabel = "Radius (m)")
 RVarFMPlot = plot(NewRTip, FMRVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Radius", xlabel = "Radius (m)")
 RVarPlot = plot(RVarCoefPlot, RVarFMPlot, layout = dims)
 
 #Redo the above but vary RPM and plot as a surface
-RVarCTSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "CT"))
-RVarCQSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "CQ"))
-RVarFMSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "FM"))
+RVarCTSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "CT"), xlabel = "RPM", ylabel = "Radius (m)", zlabel = "Coefficient of Thrust", title = "Varying RPM and Blade Radius")
+RVarCQSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "CQ"), xlabel = "RPM", ylabel = "Radius (m)", zlabel = "Coefficient of Torque", title = "Varying RPM and Blade Radius")
+RVarFMSurfacePlot = surface(RPMVar, NewRTip, RVarSurface(RPMVar, NewRTip; spitout = "FM"), xlabel = "RPM", ylabel = "Radius (m)", zlabel = "Figure of Merit", title = "Varying RPM and Blade Radius")
 
 
 ```
@@ -233,21 +242,21 @@ CQCVarS = zeros(NumofVars, NumofVars) #Initialize the CQ array
 for i = 1:NumofChords
     sections = Section.(r, ((CVarchord.+VarChordPercent[i]).*Rtip), twist, airfoils)
     op = simple_op.(Vinf, Omega, r, rho)
-    out = solve.(Ref(rotor), sections, op)
-    T, Q = thrusttorque(rotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    FMCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "helicopter")
+    out = solve.(Ref(MyRotor), sections, op)
+    T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    FMCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
-CVarCoefPlot = plot(VarChordPercent, CTCVar, title = "Varying Blade Chord", label = "Coefficient of Thrust", legend = :topleft,xlabel = "Values used to vary Chord (in % of RTip)", margin = pad, ylabel = "Coef of Thrust")
-plot!(twinx(), VarChordPercent, CQCVar, label = "CoFMicient of Torque", legend = (.56, .44),linecolor = :orange, ylabel = "Coef of Torque")
-CVarFMPlot = plot(VarChordPercent, FMCVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Blade Chord",xlabel = "Values used to vary Chord (in % of RTip)")
+CVarCoefPlot = plot(VarChordPercent, CTCVar, title = "Varying Blade Chord", label = "Coefficient of Thrust", legend = :topleft,xlabel = "Values used to vary Chord (in % of RTip)", margin = pad+1mm, ylabel = "Coef of Thrust")
+plot!(twinx(), VarChordPercent, CQCVar, label = "Coefficient of Torque", legend = (.59, .43),linecolor = :orange, ylabel = "Coef of Torque")
+CVarFMPlot = plot(VarChordPercent, FMCVar, label = "Figure of Merit", legend = (.57, .75), margin = pad, title = "Varying Blade Chord",xlabel = "Values used to vary Chord (in % of RTip)", ylabel = "Figure of Merit")
 CVarPlot = plot(CVarCoefPlot, CVarFMPlot, layout = dims)
 
 #Redo the above but vary RPM and plot as a surface
-CVarCTSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "CT"))
-CVarCQSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "CQ"))
-CVarFMSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "FM"))
+CVarCTSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "CT"), xlabel = "RPM", ylabel = "Values used to vary Chord (in % of RTip)", zlabel = "Coefficient of Thrust", title = "Varying RPM and Blade Chord")
+CVarCQSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "CQ"), xlabel = "RPM", ylabel = "Values used to vary Chord (in % of RTip)", zlabel = "Coefficient of Torque", title = "Varying RPM and Blade Chord")
+CVarFMSurfacePlot = surface(RPMVar, VarChordPercent, CVarSurface(RPMVar, VarChordPercent; spitout = "FM"), xlabel = "RPM", ylabel = "Values used to vary Chord (in % of RTip)", zlabel = "Figure of Merit", title = "Varying RPM and Blade Chord")
 
 
 ```
@@ -271,9 +280,9 @@ CQPVarS = zeros(NumofVars, NumofVars) #Initialize the CQ array
 for i = 1:NumofPitches
     pitch = VarPitch[i]*pi/180 #This is the pitch angle to use
     op = simple_op.(Vinf, Omega, r, rho; pitch)
-    out = solve.(Ref(rotor), PVarSections, op)
-    T, Q = thrusttorque(rotor, PVarSections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    FMPVar[i], CTPVar[i], CQPVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "helicopter")
+    out = solve.(Ref(MyRotor), PVarSections, op)
+    T, Q = thrusttorque(MyRotor, PVarSections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    FMPVar[i], CTPVar[i], CQPVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
@@ -283,9 +292,9 @@ PVarFMPlot = plot(VarPitch, FMPVar, label = "Figure of Merit", legend = :toprigh
 PVarPlot = plot(PVarCoefPlot, PVarFMPlot, layout = dims, xlabel = "Pitch added or subtracted from current value (deg)")
 
 #Redo the above but vary RPM and plot as a surface
-PVarCTSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "CT"))
-PVarCQSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "CQ"))
-PVarFMSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "FM"))
+PVarCTSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "CT"), xlabel = "RPM", ylabel = "Pitch added or subtracted from current value (deg)", zlabel = "Coefficient of Thrust", title = "Varying RPM and Blade Pitch")
+PVarCQSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "CQ"), xlabel = "RPM", ylabel = "Pitch added or subtracted from current value (deg)", zlabel = "Coefficient of Torque", title = "Varying RPM and Blade Pitch")
+PVarFMSurfacePlot = surface(RPMVar, VarPitch, PVarSurface(RPMVar, VarPitch; spitout = "FM"), xlabel = "RPM", ylabel = "Pitch added or subtracted from current value (deg)", zlabel = "Figure of Merit", title = "Varying RPM and Blade Pitch")
 
 
 ```
@@ -309,22 +318,22 @@ CQJVarS = zeros(NumofVars, NumofVars) #Initialize the CQ array
 for i = 1:NumofAdvanceRatios
     local Vinf = VarAdvanceRatio[i] * D * n   #makes a local inflow veloc var at each advance ratio 
     local op = simple_op.(Vinf, Omega, r, rho)  #creates op pts at each blade section/location
-    outputs = solve.(Ref(rotor), Normalsections, op) #uses all data from above plus local op conditions
-    T, Q = thrusttorque(rotor, Normalsections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    FMJVar[i], CTJVar[i], CQJVar[i] = nondim(T, Q, Vinf, Omega, rho, rotor, "helicopter")
+    outputs = solve.(Ref(MyRotor), Normalsections, op) #uses all data from above plus local op conditions
+    T, Q = thrusttorque(MyRotor, Normalsections, outputs)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    FMJVar[i], CTJVar[i], CQJVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
 end
 #Plotting
-JVarCoefPlot = plot(VarAdvanceRatio, CTJVar, title = "Varying Advance Ratio", label = "Coefficient of Thrust", legend = (.001, .45), xaxis = "Advance Ratio (J)", margin = pad, ylabel = "Coef of Thrust")
+JVarCoefPlot = plot(VarAdvanceRatio, CTJVar, title = "Varying Advance Ratio", label = "Coefficient of Thrust", legend = (.15, .45), xaxis = "Advance Ratio (J)", margin = pad+2mm, ylabel = "Coef of Thrust")
 plot!(twinx(), VarAdvanceRatio, CQJVar, label = "Coefficient of Torque", legend = :topright, linecolor = :orange, ylabel = "Coef of Torque")
 JVarFMPlot = plot(VarAdvanceRatio, FMJVar, label = "Figure of Merit", legend = :topright, margin = pad, title = "Varying Advance Ratio", xaxis = "Advance Ratio (J)")
 JVarPlot = plot(JVarCoefPlot, JVarFMPlot, layout = dims)
 
-#Redo the above but vary RPM and plot as a surface
-JVarCTSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "CT"))
-JVarCQSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "CQ"))
-JVarFMSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "FM"))
 
+#Redo the above but vary RPM and plot as a surface
+JVarCTSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "CT"), xlabel = "RPM", ylabel = "Advance Ratio (J)", zlabel = "Coefficient of Thrust", title = "Varying RPM and Advance Ratio")
+JVarCQSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "CQ"), xlabel = "RPM", ylabel = "Advance Ratio (J)", zlabel = "Coefficient of Torque", title = "Varying RPM and Advance Ratio")
+JVarFMSurfacePlot = surface(RPMVar, VarAdvanceRatio, JVarSurface(RPMVar, VarAdvanceRatio; spitout = "FM"), xlabel = "RPM", ylabel = "Advance Ratio (J)", zlabel = "Figure of Merit", title = "Varying RPM and Advance Ratio")
 
 #? Do I want to vary the twist angle also? what would varying twist look like?
 
@@ -355,14 +364,26 @@ display(PVarFMPlot)
 display(JVarCoefPlot)
 display(JVarFMPlot)
 display(RVarCTSurfacePlot)
+savefig(RVarCTSurfacePlot, "SurfaceOutputs/RVarCTSurfacePlot.png")
 display(RVarCQSurfacePlot)
+savefig(RVarCQSurfacePlot, "SurfaceOutputs/RVarCQSurfacePlot.png")
 display(RVarFMSurfacePlot)
+savefig(RVarFMSurfacePlot, "SurfaceOutputs/RVarFMSurfacePlot.png")
 display(CVarCTSurfacePlot)
+savefig(CVarCTSurfacePlot, "SurfaceOutputs/CVarCTSurfacePlot.png")
 display(CVarCQSurfacePlot)
+savefig(CVarCQSurfacePlot, "SurfaceOutputs/CVarCQSurfacePlot.png")
 display(CVarFMSurfacePlot)
+savefig(CVarFMSurfacePlot, "SurfaceOutputs/CVarFMSurfacePlot.png")
 display(PVarCTSurfacePlot)
+savefig(PVarCTSurfacePlot, "SurfaceOutputs/PVarCTSurfacePlot.png")
 display(PVarCQSurfacePlot)
+savefig(PVarCQSurfacePlot, "SurfaceOutputs/PVarCQSurfacePlot.png")
 display(PVarFMSurfacePlot)
+savefig(PVarFMSurfacePlot, "SurfaceOutputs/PVarFMSurfacePlot.png")
 display(JVarCTSurfacePlot)
+savefig(JVarCTSurfacePlot, "SurfaceOutputs/JVarCTSurfacePlot.png")
 display(JVarCQSurfacePlot)
+savefig(JVarCQSurfacePlot, "SurfaceOutputs/JVarCQSurfacePlot.png")
 display(JVarFMSurfacePlot)
+savefig(JVarFMSurfacePlot, "SurfaceOutputs/JVarFMSurfacePlot.png")
