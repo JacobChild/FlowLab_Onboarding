@@ -23,7 +23,7 @@ TODO for to-dos
 =#
 
 #Needed packages for the whole project, and function file 
-using Revise, Xfoil, DataFrames, FLOWMath, Dierckx, DelimitedFiles, Plots.Measures, Plots, CCBlade, Printf
+using Revise, Xfoil, DataFrames, FLOWMath, Dierckx, DelimitedFiles, Plots.Measures, Plots, CCBlade
 #using JCDevCCBlade #? Come back to trying to make this package work, right now it is taking too much time.
 #MyDevCCBlade is the CCBlade package plus an if statement that sets the figure of merit to zero when T < 0
 #You are welcome to use CCBlade like normal, but may need to narrow the variable ranges to avoid errors
