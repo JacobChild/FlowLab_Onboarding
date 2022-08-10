@@ -7,7 +7,16 @@
 ```
 New Functions used for the optimization
 ```
+function InitialPopulation(PopSize, NumofVars, lower, upper)
+   #Make a vector of Individuals
+   OutputPopInit = [[(rand(range(lower[1],upper[1],length=50))), (rand(range(lower[2],upper[2],length=50)))] for i in 1:PopSize]
+   #println(OutputPopInit)
+    return OutputPopInit
+
+end
+
 function ConstraintFunction(x)
+    println("Constraint Input $x")
     CurrentChord = x[1]
     pitch = x[2]*pi/180
     sections = Section.(r, ((CVarchord.+CurrentChord).*Rtip), twist, airfoils)
@@ -16,10 +25,13 @@ function ConstraintFunction(x)
     T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     #FMCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
+println("Constraint Output $Q")
     return Q #Returns the Torque 
 end
 
 function ObjectiveFunction(x)
+    #println("What is pulled in $x")
+    #throwerror
     CurrentChord = x[1]
     pitch = x[2]*pi/180
     sections = Section.(r, ((CVarchord.+CurrentChord).*Rtip), twist, airfoils)
@@ -28,9 +40,24 @@ function ObjectiveFunction(x)
     T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     #FMCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
-    return -T #Returns the Thrust, negative so it can "minimize" the function 
+    OutputT = -1.0*T
+    #println("ObjFunc PopInit[1] = $(x[1])")
+    #throwerror
+    return OutputT #Returns the Thrust, negative so it can "minimize" the function 
 end
 
+function Verification(x)
+    CurrentChord = x[1]
+    pitch = x[2]*pi/180
+    sections = Section.(r, ((CVarchord.+CurrentChord).*Rtip), twist, airfoils)
+    op = simple_op.(Vinf, Omega, r, rho; pitch)
+    out = solve.(Ref(MyRotor), sections, op)
+    T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    OutputT = -1.0*T
+    println("Thrust = $T")
+    println("Torque = $Q")
+    return OutputT
+end
 
 ```
 Old Functions needed for trade study and older etc
