@@ -163,18 +163,16 @@ CVarchord = chord/Rtip ##this makes it so we can vary chord as a percent of Rtip
 lower = [-.075, -3] # in the format [chord, pitch]
 upper = [.025, 8] # in the format [chord, pitch]
 #x0 = [0.0, 0.0]
-PopSize = 50
+PopSize = 1000
 NumofVars = 2
 PopInit = InitialPopulation(PopSize, NumofVars, lower, upper)
-#x0 = [ (rand(range(lower[1],upper[1],length=50))), (rand(range(lower[2],upper[2],length=50)))] #in the format [chord, pitch]
-#[println("PopInit[1] = $(PopInit[1])")]
-#println("What is made $PopInit")
-lc = [0.0] #Lower constraint on Torque
-uc = [.09] #Upper constraint on Torque, the old method gave .05998
+
+lc = [-Inf] #Lower constraint on Torque
+uc = [.06] #Upper constraint on Torque, the old method gave .05998
 constraints = WorstFitnessConstraints(lower, upper, lc, uc, ConstraintFunction)
 
 #Run the Optimizer 
 #result = Evolutionary.optimize(ObjectiveFunction, PopInit, GA(populationSize = PopSize)) #without constraints
-result = Evolutionary.optimize(ObjectiveFunction, constraints, PopInit, GA(populationSize = 50))
+result = Evolutionary.optimize(ObjectiveFunction, constraints, PopInit, GA(populationSize = PopSize))
 println(result)
 Verification(Evolutionary.minimizer(result))

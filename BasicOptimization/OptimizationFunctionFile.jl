@@ -16,30 +16,35 @@ function InitialPopulation(PopSize, NumofVars, lower, upper)
 end
 
 function ConstraintFunction(x)
-    println("Constraint Input $x")
+    Q = zeros(1) #this makes it a 1 element vector
+    T = zeros(1)
+    #println("Constraint Input $x")
     CurrentChord = x[1]
     pitch = x[2]*pi/180
     sections = Section.(r, ((CVarchord.+CurrentChord).*Rtip), twist, airfoils)
     op = simple_op.(Vinf, Omega, r, rho; pitch)
     out = solve.(Ref(MyRotor), sections, op)
-    T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    T[1], Q[1] = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     #FMCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
-println("Constraint Output $Q")
+    #println("Constraint Output $Q")
     return Q #Returns the Torque 
 end
 
 function ObjectiveFunction(x)
     #println("What is pulled in $x")
     #throwerror
+    Q = zeros(1) #this makes it a 1 element vector
+    #T = zeros(1)
     CurrentChord = x[1]
     pitch = x[2]*pi/180
     sections = Section.(r, ((CVarchord.+CurrentChord).*Rtip), twist, airfoils)
     op = simple_op.(Vinf, Omega, r, rho; pitch)
     out = solve.(Ref(MyRotor), sections, op)
-    T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+    T, Q[1] = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     #FMCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
     # calcs the coef of the blade under the given conditions at each advance ratio
+    #T[1] = -1.0.*T[1]
     OutputT = -1.0*T
     #println("ObjFunc PopInit[1] = $(x[1])")
     #throwerror
