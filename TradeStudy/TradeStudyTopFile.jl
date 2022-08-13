@@ -12,7 +12,7 @@ It has been coded in such a way that if you set up your blade file structure
 https://github.com/byuflowlab/FLOWUnsteady  you only need to change the variable CmdFileName
 found around line 53 to your "command file" name.
 
- cd("C:/Users/child/Documents/Flow_Lab/Onboarding/TradeStudy")
+cd("C:/Users/child/Documents/Flow_Lab/Onboarding/TradeStudy")
 
  Note: I used the "Better Comments" Extension to help find things, the legend is below
  * for highlighted text
@@ -173,7 +173,8 @@ airfoils = aftypes[af_idx]  #This is the array of airfoil objects that correspon
 Normalsections = Section.(r, chord, twist, airfoils)    #This is the reference with everything unchanged
 Normalop = simple_op.(Vinf, Omega, r, rho) #The Normal operating points
 Normalout = solve.(Ref(MyRotor), Normalsections, Normalop)  #outputs a struct of results for each section/radial location
-
+NormalThrust, NormalTorque = thrusttorque(MyRotor, Normalsections, Normalout)
+throwerror 
 #Vary the Variables- Rtip, chord, twist
 ```
 Vary the radius- Note, r is a function of Rtip, so first take that out before redefining r
