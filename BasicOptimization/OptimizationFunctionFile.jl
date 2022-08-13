@@ -9,8 +9,14 @@ New Functions used for the optimization
 ```
 function InitialPopulation(PopSize, NumofVars, lower, upper)
    #Make a vector of Individuals
-   OutputPopInit = [[(rand(range(lower[1],upper[1],length=50))), (rand(range(lower[2],upper[2],length=50)))] for i in 1:PopSize]
-   #println(OutputPopInit)
+   OutputPopInit = fill(zeros(NumofVars),PopSize) #makes a vector of vectors
+	for ind in 1:PopSize
+	Individual = zeros(NumofVars)
+		for var in 1:NumofVars
+		Individual[var] = rand(range(lower[var],upper[var],length=500))
+		end
+	OutputPopInit[ind] = Individual
+	end
     return OutputPopInit
 
 end
@@ -19,50 +25,72 @@ function ConstraintFunction(x)
     Q = zeros(1) #this makes it a 1 element vector
     T = zeros(1)
     #println("Constraint Input $x")
-    CurrentChord = x[1]
-    pitch = x[2]*pi/180
-    sections = Section.(r, ((CVarchord.+CurrentChord).*Rtip), twist, airfoils)
-    op = simple_op.(Vinf, Omega, r, rho; pitch)
+    CurrentChordDist = x[1:round(Int64,NumofVars/2)]
+    CurrentTwistDist = x[round(Int64,NumofVars/2)+1:end]
+    sections = Section.(r, CurrentChordDist, CurrentTwistDist, airfoils)
+    op = simple_op.(Vinf, Omega, r, rho)
     out = solve.(Ref(MyRotor), sections, op)
     T[1], Q[1] = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    #FMCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
-    # calcs the coef of the blade under the given conditions at each advance ratio
-    #println("Constraint Output $Q")
+
     return Q #Returns the Torque 
 end
 
 function ObjectiveFunction(x)
-    #println("What is pulled in $x")
-    #throwerror
-    Q = zeros(1) #this makes it a 1 element vector
-    #T = zeros(1)
-    CurrentChord = x[1]
-    pitch = x[2]*pi/180
-    sections = Section.(r, ((CVarchord.+CurrentChord).*Rtip), twist, airfoils)
-    op = simple_op.(Vinf, Omega, r, rho; pitch)
+    
+    CurrentChordDist = x[1:round(Int64,NumofVars/2)]
+    CurrentTwistDist = x[round(Int64,NumofVars/2)+1:end]
+    sections = Section.(r, CurrentChordDist, CurrentTwistDist, airfoils)
+    op = simple_op.(Vinf, Omega, r, rho)
     out = solve.(Ref(MyRotor), sections, op)
-    T, Q[1] = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
-    #FMCVar[i], CTCVar[i], CQCVar[i] = nondim(T, Q, Vinf, Omega, rho, MyRotor, "helicopter")
-    # calcs the coef of the blade under the given conditions at each advance ratio
-    #T[1] = -1.0.*T[1]
+    T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
+        
     OutputT = -1.0*T
-    #println("ObjFunc PopInit[1] = $(x[1])")
-    #throwerror
     return OutputT #Returns the Thrust, negative so it can "minimize" the function 
 end
 
 function Verification(x)
-    CurrentChord = x[1]
-    pitch = x[2]*pi/180
-    sections = Section.(r, ((CVarchord.+CurrentChord).*Rtip), twist, airfoils)
-    op = simple_op.(Vinf, Omega, r, rho; pitch)
+    CurrentChordDist = x[1:round(Int64,NumofVars/2)]
+    CurrentTwistDist = x[round(Int64,NumofVars/2)+1:end]
+    sections = Section.(r, CurrentChordDist, CurrentTwistDist, airfoils)
+    op = simple_op.(Vinf, Omega, r, rho)
     out = solve.(Ref(MyRotor), sections, op)
     T, Q = thrusttorque(MyRotor, sections, out)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
     OutputT = -1.0*T
-    println("Thrust = $T")
-    println("Torque = $Q")
-    return OutputT
+    #println("Thrust = $T")
+    #println("Torque = $Q")
+    return T, Q, OutputT
 end
+
+function WhatChanged(New,chord,twist)
+    #Chord Changes
+    FPercentChordChange = (New[1:27] .- chord) ./ chord .* 100
+    ActualChordChangeMM = (New[1:27] .- chord) .* 1000
+    
+    #Twist Changes
+    FPercentTwistChange = (New[28:54] .- twist) ./ twist .* 100
+    NewDegs = New[28:54].* 180 ./ pi
+    OldDegs = twist .* 180 ./ pi
+    ActualTwistChangeDeg =NewDegs - OldDegs
+    
+    #Plot
+    PercentChangesPlot = plot(FPercentChordChange, margin = 17mm, xlabel = "Blade section", ylabel = "Percent Change", label = "Chord Change", legend =:right, title = "Percent Blade Geometry Change", grid=true, minorgrid=true)
+    plot!(twinx(), FPercentTwistChange, linecolor =:orange, ylabel = "Percent Change", label = "Twist change", legend =:topright)
+    
+    ActualChangesPlot = plot(ActualChordChangeMM, margin = 17mm, xlabel = "Blade section", ylabel = "Chord Change (MM)", label = "Chord Change", legend =:right, title = "Blade Geometry Change", grid=true, minorgrid=true)
+    plot!(twinx(), ActualTwistChangeDeg, linecolor =:orange, ylabel = "Twist Change (Deg)", label = "Twist change", legend =:topright)
+    
+    ActualGeometryPlot = plot(New[1:27] .* 100, margin = 17mm, xlabel = "Blade section", ylabel = "Chord (CM)", label = "Chord", legend =:right, title = "Blade Geometry", grid=true, minorgrid=true)
+    plot!(twinx(), New[28:54] .* 180 ./ pi, linecolor =:orange, ylabel = "Twist (Deg)", label = "Twist", legend =:topright)
+    
+    OriginalGeometryPlot = plot(chord .* 100, margin = 17mm, xlabel = "Blade section", ylabel = "Chord (CM)", label = "Chord", legend =:right, title = "Original Blade Geometry", grid=true, minorgrid=true)
+    plot!(twinx(), twist .* 180 ./ pi, linecolor =:orange, ylabel = "Twist (Deg)", label = "Twist", legend =:topright)
+    
+    display(PercentChangesPlot)
+    display(ActualChangesPlot)
+    display(ActualGeometryPlot)
+    display(OriginalGeometryPlot)
+    
+    end
 
 ```
 Old Functions needed for trade study and older etc

@@ -153,6 +153,7 @@ airfoils = aftypes[af_idx]  #This is the array of airfoil objects that correspon
 Normalsections = Section.(r, chord, twist, airfoils)    #This is the reference with everything unchanged
 Normalop = simple_op.(Vinf, Omega, r, rho) #The Normal operating points
 Normalout = solve.(Ref(MyRotor), Normalsections, Normalop)  #outputs a struct of results for each section/radial location
+NormalT, NormalQ = thrusttorque(MyRotor, Normalsections, Normalout)   #calcs T & Q at each sec w/given conds, sums them for the whole rotor
 
 #Calculation setup
 CVarchord = chord/Rtip ##this makes it so we can vary chord as a percent of Rtip, rather than a fixed measurement
@@ -160,19 +161,53 @@ CVarchord = chord/Rtip ##this makes it so we can vary chord as a percent of Rtip
 
 #Optimization setup
 #Bounds 
-lower = [-.075, -3] # in the format [chord, pitch]
-upper = [.025, 8] # in the format [chord, pitch]
+#lower = [-.075, -3] # in the format [chord, pitch]
+#upper = [.025, 8] # in the format [chord, pitch]
 #x0 = [0.0, 0.0]
-PopSize = 1000
-NumofVars = 2
-PopInit = InitialPopulation(PopSize, NumofVars, lower, upper)
+PopSize = 200
+NumofVars = length(chord)*2
 
+lower = zeros(NumofVars) # in the format [chord, pitch]
+upper = zeros(NumofVars)
+#The chord in each section is constrained from 0.01 to 2*Rtip
+lower[1:length(chord)] .= minimum(chord) #1cm
+upper[1:length(chord)] .= 0.750*Rtip
+#The twist in each section is constrained to -10deg to 90deg
+lower[length(chord)+1:end] .= -20*pi/180 #-10 degrees
+upper[length(chord)+1:end] .= 75*pi/180 #60 degrees
 lc = [-Inf] #Lower constraint on Torque
 uc = [.06] #Upper constraint on Torque, the old method gave .05998
-constraints = WorstFitnessConstraints(lower, upper, lc, uc, ConstraintFunction)
 
+Runs = 20
+ThrustOutput = zeros(Runs)
+TorqueOutput = zeros(Runs)
+#for i = 1:Runs
+PopInit = InitialPopulation(PopSize, NumofVars, lower, upper)
+#show(PopInit[1])
+constraints = WorstFitnessConstraints(lower, upper, lc, uc, ConstraintFunction)
+MyGA = GA(populationSize=PopSize,selection=tournament(7), mutation=gaussian(),crossover=intermediate(2), mutationRate = .1, crossoverRate = .7,)
+#MyGA = GA(populationSize = PopSize, selection=sus,  mutation=gaussian())
 #Run the Optimizer 
 #result = Evolutionary.optimize(ObjectiveFunction, PopInit, GA(populationSize = PopSize)) #without constraints
-result = Evolutionary.optimize(ObjectiveFunction, constraints, PopInit, GA(populationSize = PopSize))
-println(result)
-Verification(Evolutionary.minimizer(result))
+#result = Evolutionary.optimize(ObjectiveFunction, constraints, PopInit, GA(populationSize = PopSize), Evolutionary.Options(successive_f_tol = 0, iterations = 100))
+result = Evolutionary.optimize(ObjectiveFunction, constraints, PopInit,MyGA, Evolutionary.Options(parallelization=:thread))#println(result)
+VerifyThrust, VerifyTorque, VerifyOutputT = Verification(Evolutionary.minimizer(result))
+PercentThrustImprovement = (VerifyThrust - NormalT)/NormalT*100
+println("Percent Thrust Improvement: $PercentThrustImprovement")
+PercentTorqueImprovement = (VerifyTorque - NormalQ)/NormalQ*100
+println("Percent Torque Improvement: $PercentTorqueImprovement")
+println("Do the outputs match? $(result.minimum==VerifyOutputT)")
+#=
+if result.minimum == VerifyOutputT
+    ThrustOutput[i] = VerifyThrust
+    TorqueOutput[i] = VerifyTorque
+else
+    println("Outputs do not match!")
+    break
+end
+end
+plot(ThrustOutput, margin = 17mm, xlabel = "Iterations", ylabel = "Thrust (N)", label = "Thrust", legend = :bottomleft, title = "Thrust and Torque from a Genetic Algorithm")
+plot!(twinx(),TorqueOutput,linecolor = :orange, ylabel = "Torque (Nm)", label = "Torque", legend = :bottomright)
+=#
+
+WhatChanged(Evolutionary.minimizer(result),chord,twist)
